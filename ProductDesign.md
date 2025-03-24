@@ -1,13 +1,48 @@
 # PDF to YAML Schema Converter
 
 ## Overview
-A command-line application that processes PDF files containing database schema descriptions and generates structured YAML output. The application uses OpenAI's language models to understand and structure the content, making it easier to integrate with other tools and workflows.
+A command-line application that processes PDF files containing database schema descriptions and generates structured YAML output. The application leverages LangGraph for orchestration and OpenAI's language models to understand and structure the content, making it easier to integrate with other tools and workflows.
 
 ## Architecture
 
+### Framework Selection: LangChain vs LangGraph Trade-offs
+
+We evaluated both LangChain and LangGraph for this application:
+
+#### LangChain Characteristics
+- Traditional sequential chain-based workflows
+- Simple implementation for linear processes
+- Built-in document loading and processing tools
+- Basic memory management through Memory classes
+- Mature but less flexible for complex state handling
+
+#### LangGraph Benefits
+- Graph-based state machine architecture
+- Superior error recovery and retry mechanisms
+- Explicit state management for complex workflows
+- Better handling of edge cases and validation loops
+- Visual workflow debugging capabilities
+- Native support for parallel processing
+- More granular control over the conversion pipeline
+
+#### Decision
+For this application, we chose LangGraph because:
+1. Schema conversion often requires multiple validation and refinement cycles
+2. Error handling needs sophisticated recovery paths (e.g., OCR failures, schema ambiguities)
+3. The graph-based architecture allows for:
+   - Parallel processing of multiple schema sections
+   - Dynamic branching based on content complexity
+   - Explicit state tracking for partial successes
+4. Visual debugging helps optimize the conversion pipeline
+5. Future extensibility for more complex workflows
+
 ### High-Level Flow
 ```
-Input PDF → PDF Text Extraction → OpenAI Processing → YAML Generation → Output YAML
+                        ┌─── Validation Loop ───┐
+                        │                       │
+Input PDF → Text Extraction → Schema Analysis → YAML Generation → Output
+                        │                       │
+                        └─── Error Recovery ────┘
 ```
 
 ### Components
@@ -19,13 +54,14 @@ Input PDF → PDF Text Extraction → OpenAI Processing → YAML Generation → 
    - Provides clean, normalized text output
    - Includes robust error handling for OCR and PDF processing
 
-2. **OpenAI Integration** (`openai_integration/`)
-   - Manages communication with OpenAI API
-   - Processes extracted text to identify schema descriptions
-   - Converts natural language into structured data
-   - Handles API errors and rate limiting
-   - Uses configurable prompts for consistent output
-   - Includes YAML validation and cleanup of API responses
+2. **LangGraph Integration** (`langgraph_integration/`)
+   - Implements state machine for document processing
+   - Defines nodes for schema identification and transformation
+   - Manages parallel processing of document sections
+   - Handles state transitions and error recovery
+   - Implements validation and refinement cycles
+   - Provides visual workflow monitoring
+   - Includes comprehensive retry strategies
 
 3. **YAML Generator** (`yaml_generator/`)
    - Generates standardized YAML output
