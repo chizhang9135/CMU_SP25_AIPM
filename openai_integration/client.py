@@ -1,129 +1,110 @@
-from typing import Dict, List, Any, Optional, Tuple
+"""
+OpenAI client for processing PDF content.
+"""
 import os
-from pathlib import Path
+from typing import Dict, List, Optional, Tuple
 import yaml
-from openai import OpenAI
+from pathlib import Path
+
 from config.constants import (
     OPENAI_API_KEY_ENV,
     OPENAI_MODEL,
     OPENAI_TEMPERATURE,
     DEFAULT_PROMPT_TEMPLATE,
-    SCHEMA_KEYWORDS,
-    REQUIRED_ROLE,
 )
 
+class OpenAIClientError(Exception):
+    """Base exception for OpenAI client errors."""
+    pass
+
+class ConfigurationError(OpenAIClientError):
+    """Exception raised for configuration errors."""
+    pass
+
+class TemplateError(OpenAIClientError):
+    """Exception raised for template errors."""
+    pass
+
 class OpenAIClient:
-    """Client for processing structured content using OpenAI."""
+    """Client for interacting with OpenAI API."""
     
-    def __init__(self, prompt_template_path: str = DEFAULT_PROMPT_TEMPLATE):
-        self.client = OpenAI(api_key=os.getenv(OPENAI_API_KEY_ENV))
-        self.system_prompt = self._load_prompt_template(prompt_template_path)
+    def __init__(self):
+        """Initialize the OpenAI client with API key and prompt template."""
+        # Set up OpenAI API key
+        os.environ["OPENAI_API_KEY"] = OPENAI_API_KEY_ENV
+        
+        # Load prompt template
+        self.prompt_template = self._load_prompt_template()
+        
+        # Initialize OpenAI client
+        import openai
+        self.client = openai.OpenAI()
 
-    def _load_prompt_template(self, template_path: str) -> str:
-        """Load the prompt template from file."""
+    def _load_prompt_template(self) -> str:
+        """
+        Load the prompt template from file.
+        
+        Returns:
+            The prompt template string
+            
+        Raises:
+            TemplateError: If template file cannot be loaded
+        """
+        template_path = Path(DEFAULT_PROMPT_TEMPLATE)
         try:
-            with open(template_path, 'r') as f:
-                return f.read().strip()
+            with open(template_path, 'r', encoding='utf-8') as f:
+                template = f.read().strip()
+                if not template:
+                    raise TemplateError("Prompt template file is empty")
+                return template
         except FileNotFoundError:
-            raise FileNotFoundError(
-                f"Prompt template not found at {template_path}. "
-                "Please ensure the template file exists in the config/prompts directory."
+            raise TemplateError(
+                f"Prompt template not found at {template_path}"
             )
-
-    def process_content(self, structured_content: Dict[str, Any]) -> Dict[str, List[Dict[str, str]]]:
-        """
-        Process structured content into dataset descriptions.
-        
-        Args:
-            structured_content: Dictionary containing structured content from the PDF
-            
-        Returns:
-            Dictionary containing dataset descriptions in the required format
-        """
-        # Extract relevant sections that contain schema information
-        schemas = self._identify_schemas(structured_content)
-        
-        # Process each schema
-        datasets = {}
-        for schema in schemas:
-            response = self._generate_dataset_description(schema)
-            if response:
-                dataset_name, description = response
-                datasets[dataset_name] = description
-        
-        return datasets
-
-    def _identify_schemas(self, content: Dict[str, Any]) -> List[Dict[str, Any]]:
-        """Extract schema definitions from the structured content."""
-        schemas = []
-        
-        # Look for schema definitions in sections
-        for section in content.get('sections', []):
-            if any(keyword in section['title'].lower() 
-                  for keyword in SCHEMA_KEYWORDS):
-                schemas.append({
-                    'title': section['title'],
-                    'content': section['content'],
-                    'tables': self._find_related_tables(content.get('tables', []), section),
-                })
-        
-        return schemas
-
-    def _find_related_tables(self, tables: List[Dict[str, Any]], section: Dict[str, Any]) -> List[Dict[str, Any]]:
-        """Find tables that are related to this schema section."""
-        # Simple heuristic: tables that appear within the section's content
-        section_content = '\n'.join(section['content'])
-        return [table for table in tables 
-                if any(col in section_content for col in table['headers'])]
-
-    def _generate_dataset_description(self, schema: Dict[str, Any]) -> Optional[Tuple[str, List[Dict[str, str]]]]:
-        """
-        Generate a dataset description for a schema using OpenAI.
-        
-        Args:
-            schema: Dictionary containing schema information
-            
-        Returns:
-            Tuple of (dataset_name, description) if successful, None if parsing fails
-        """
-        # Prepare the schema content for the prompt
-        schema_content = f"""
-        Title: {schema['title']}
-        
-        Content:
-        {'\n'.join(schema['content'])}
-        
-        Tables:
-        {self._format_tables(schema['tables'])}
-        """
-        
-        # Call OpenAI API
-        response = self.client.chat.completions.create(
-            model=OPENAI_MODEL,
-            messages=[
-                {"role": REQUIRED_ROLE, "content": self.system_prompt},
-                {"role": "user", "content": f"Convert this schema into a dataset description:\n{schema_content}"}
-            ],
-            temperature=OPENAI_TEMPERATURE,
-        )
-        
-        # Extract dataset name and description from the response
-        try:
-            response_text = response.choices[0].message.content
-            # Parse the YAML-formatted response
-            dataset = yaml.safe_load(response_text)
-            name = next(iter(dataset.keys()))
-            return name, dataset[name]
         except Exception as e:
-            print(f"Error parsing OpenAI response: {e}")
-            return None
+            raise TemplateError(f"Error loading prompt template: {e}")
 
-    def _format_tables(self, tables: List[Dict[str, Any]]) -> str:
-        """Format tables for inclusion in the prompt."""
-        result = []
-        for table in tables:
-            headers = ' | '.join(table['headers'])
-            result.append(f"Headers: {headers}")
-            for row in table['rows']:
-                result.append(' | '.join(row))
-        return '\n'.join(result) 
+    def process_pdf_text(self, text: str) -> Dict[str, List[Dict[str, str]]]:
+        """
+        Process PDF text content using OpenAI.
+        
+        Args:
+            text: Raw text extracted from PDF
+            
+        Returns:
+            Dictionary containing dataset descriptions
+            
+        Raises:
+            OpenAIClientError: If processing fails
+        """
+        try:
+            # Create chat completion
+            response = self.client.chat.completions.create(
+                model=OPENAI_MODEL,
+                temperature=OPENAI_TEMPERATURE,
+                messages=[
+                    {"role": "system", "content": self.prompt_template},
+                    {"role": "user", "content": text}
+                ]
+            )
+            
+            # Parse response
+            content = response.choices[0].message.content
+            try:
+                # Remove YAML code block markers if present
+                if content.startswith('```yaml'):
+                    content = content[7:]
+                if content.endswith('```'):
+                    content = content[:-3]
+                content = content.strip()
+                
+                # Parse YAML content
+                result = yaml.safe_load(content)
+                if not isinstance(result, dict):
+                    raise OpenAIClientError("OpenAI response is not in the expected format")
+                return result
+            except yaml.YAMLError as e:
+                raise OpenAIClientError(f"Failed to parse OpenAI response as YAML: {e}")
+            
+        except Exception as e:
+            raise OpenAIClientError(f"OpenAI API error: {e}") 

@@ -1,162 +1,107 @@
-# PDF Processing Application Design
+# PDF to YAML Schema Converter
 
 ## Overview
-A terminal-based application that processes PDFs to extract and understand content, then leverages OpenAI to generate structured YAML output based on templates.
+A command-line application that processes PDF files containing database schema descriptions and generates structured YAML output. The application uses OpenAI's language models to understand and structure the content, making it easier to integrate with other tools and workflows.
 
-## Phase 1: PDF Parsing and YAML Generation
+## Architecture
 
-### Architecture Overview
+### High-Level Flow
 ```
-Input PDF → PDF Parser → Structured Data → OpenAI Processing → YAML Generation → Output YAML
-```
-
-### Modular Structure
-
-1. **Core Modules**
-   - `pdf_extractor/`: Enhanced version of existing PDFTextExtractor
-   - `content_processor/`: Text processing and structuring
-   - `openai_integration/`: OpenAI API interactions
-   - `yaml_generator/`: Templating and YAML output
-   - `config/`: Configuration settings and templates
-
-2. **File Structure**
-```
-project_root/
-├── main.py                # CLI entry point (handles one PDF per run)
-├── pdf_extractor/
-│   ├── __init__.py
-│   └── extractor.py       # Enhanced PDFTextExtractor
-├── content_processor/
-│   ├── __init__.py
-│   └── parser.py          # Content parsing and structuring
-├── openai_integration/
-│   ├── __init__.py
-│   └── client.py          # OpenAI API interface
-├── yaml_generator/
-│   ├── __init__.py
-│   └── templater.py       # Template application logic
-├── config/
-│   ├── settings.py        # Configuration settings
-│   └── templates/         # YAML templates
-│       └── default.yaml   # Default template
-├── utils/
-│   ├── __init__.py
-│   └── helpers.py         # Common utilities
-└── requirements.txt
+Input PDF → PDF Text Extraction → OpenAI Processing → YAML Generation → Output YAML
 ```
 
-### Implementation Plan
+### Components
 
-1. **Command-line Interface**
-   - Simple argument-based interface (`python main.py input.pdf --template default.yaml`)
-   - Configuration via config file or command-line arguments
-   - Clear output messages with processing status
+1. **PDF Text Extractor** (`pdf_extractor/`)
+   - Handles PDF file reading and text extraction
+   - Uses PyMuPDF for PDF parsing
+   - Implements OCR capabilities using Tesseract for scanned documents
+   - Provides clean, normalized text output
+   - Includes robust error handling for OCR and PDF processing
 
-2. **PDF Extraction Enhancement**
-   - Build on existing PDFTextExtractor
-   - Add content structure detection (headings, sections)
-   - Improve error handling for various PDF formats
+2. **OpenAI Integration** (`openai_integration/`)
+   - Manages communication with OpenAI API
+   - Processes extracted text to identify schema descriptions
+   - Converts natural language into structured data
+   - Handles API errors and rate limiting
+   - Uses configurable prompts for consistent output
+   - Includes YAML validation and cleanup of API responses
 
-3. **OpenAI Integration**
-   - Build client for OpenAI API
-   - Design effective prompts for content understanding
-   - Implement structured data extraction
+3. **YAML Generator** (`yaml_generator/`)
+   - Generates standardized YAML output
+   - Implements templating for consistent formatting
+   - Validates output structure
+   - Saves files to `/output` directory with standardized naming
+   - Includes comprehensive error handling for file operations
 
-4. **YAML Generation**
-   - Template-based YAML output
-   - Validation against schema
-   - Configurable output format
+4. **Configuration** (`config/`)
+   - Centralizes all configuration settings
+   - Manages environment variables and constants
+   - Stores template files and system prompts
+   - Provides easy customization of application behavior
 
-## Phase 2: Terminal-Based Agentic System with Human Validation
+### Implementation Details
 
-### Architecture Overview
+#### Configuration
+- Templates stored in `config/templates/`
+- Environment variables for API keys and settings
+- Configurable OpenAI parameters (model, temperature, etc.)
+- Constants defined in `config/constants.py`
+
+#### Error Handling
+- Custom exception classes for each component
+- Detailed logging with debug mode
+- Graceful failure handling with informative messages
+- Proper cleanup of temporary files and resources
+
+#### Output Format
+- Standardized YAML structure
+- Files saved as `dataset_descriptions_from_{pdf_name}.yaml`
+- All outputs stored in `/output` directory
+- Consistent formatting and structure
+
+## Command-Line Interface
+
+```bash
+python main.py <input_pdf> [--template TEMPLATE] [--verbose]
 ```
-PDF → Parse → Agent System → Terminal Human Validation → Refinement → YAML Output
+
+### Arguments
+- `input_pdf`: Path to the PDF file to process
+- `--template`: Optional path to custom YAML template (default: config/templates/default.yaml)
+- `--verbose`: Enable detailed logging output
+
+## Dependencies
+- PyMuPDF (>=1.25.0): PDF parsing
+- Pillow (>=11.0.0): Image processing
+- pytesseract (>=0.3.13): OCR capabilities
+- OpenAI (>=1.68.0): API integration
+- PyYAML (>=6.0.0): YAML processing
+- python-dotenv (>=1.0.0): Environment management
+
+## Installation
+1. Install Python 3.13+
+2. Install Tesseract OCR
+3. Install Python dependencies: `pip install -r requirements.txt`
+4. Set up environment variables in `.env` file:
+   ```
+   OPENAI_API_KEY=your_api_key_here
+   ```
+
+## Usage Example
+```bash
+python main.py example.pdf --verbose
 ```
 
-### Technology Choices
+This will:
+1. Extract text from example.pdf
+2. Process the content using OpenAI
+3. Generate a YAML file in the /output directory
+4. Name the output file as dataset_descriptions_from_example.yaml
 
-For Phase 2, we will primarily use **LangGraph** as the agent orchestration framework:
-
-1. **Why LangGraph:**
-   - Provides a structured graph-based approach for complex workflows
-   - Built-in support for human-in-the-loop validation cycles
-   - Robust state management for tracking validation progress
-   - Seamless integration with OpenAI components from Phase 1
-   - Natural representation of multi-agent coordination
-
-3. **Supporting Technologies:**
-   - **Pydantic**: For data validation and schema enforcement
-   - **Rich**: For enhanced terminal display (colors, progress bars)
-   - **YAML**: For state persistence between processing steps
-
-### Enhanced Modules
-
-1. **Terminal-Based Human Interface**
-   - `terminal_interface/`: Simple terminal interaction
-     - `prompt_handler.py`: Terminal-based prompts
-     - `feedback_collector.py`: User input collection
-     - `display.py`: Information presentation
-
-2. **Agent System**
-   - `agents/`: LangGraph-based agent system
-     - `orchestrator.py`: Main agent flow controller
-     - `pdf_agent.py`: PDF understanding specialist
-     - `validation_agent.py`: Data validation specialist
-
-3. **Workflow Manager**
-   - `workflow/`: Process management
-     - `state.py`: Workflow state management
-     - `decision.py`: Next steps decision logic
-
-### Implementation Plan
-
-1. **Terminal Interface**
-   - Color-coded output for different message types
-   - Step-by-step validation prompts
-   - Simple input collection with validation
-   - Progress indicators for long-running processes
-
-2. **Agent Framework**
-   - LangGraph or ReAct implementation
-   - Create specialized agents for different tasks
-   - Build decision flow for processing steps
-
-3. **Human Validation Flow**
-   - Present extracted information in digestible chunks
-   - Allow section-by-section validation and correction
-   - Implement verification prompts for key information
-   - Create simple feedback mechanisms (yes/no, corrections)
-
-4. **Single-Run Process**
-   - Design process to handle exactly one PDF per execution
-   - Implement clear entry and exit points
-   - Create resumable state (optional) for interrupted runs
-
-## Development Roadmap
-
-1. **Initial Setup (1 week)**
-   - Environment setup
-   - Base structure implementation
-   - Command-line interface
-
-2. **Phase 1 Core (2 weeks)**
-   - PDF parser enhancement
-   - OpenAI integration
-   - YAML template system
-   - End-to-end functionality
-
-3. **Phase 1 Testing (1 week)**
-   - Testing with diverse PDFs
-   - Error handling improvements
-   - Performance optimization
-
-4. **Phase 2 Framework (2 weeks)**
-   - LangGraph implementation
-   - Agent design and implementation
-   - Terminal-based validation interface
-
-5. **Final Integration (1 week)**
-   - Complete system connection
-   - End-to-end testing
-   - Documentation 
+## Error Messages
+Common error messages and their solutions:
+- "Tesseract not found": Install Tesseract OCR and ensure it's in your PATH
+- "OpenAI API key not found": Check your .env file configuration
+- "Invalid PDF file": Ensure the input file is a valid PDF
+- "YAML generation failed": Check the input PDF format and content 

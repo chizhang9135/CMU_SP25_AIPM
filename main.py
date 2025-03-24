@@ -1,13 +1,22 @@
 #!/usr/bin/env python3
 import argparse
 import sys
+import logging
 from pathlib import Path
 
 from pdf_extractor.extractor import PDFTextExtractor
-from content_processor.parser import ContentParser
-from openai_integration.client import OpenAIClient
-from yaml_generator.templater import YAMLGenerator
-from utils.helpers import setup_logging
+from openai_integration.client import OpenAIClient, OpenAIClientError
+from yaml_generator.templater import YAMLGenerator, YAMLGeneratorError
+from config.constants import DEFAULT_YAML_TEMPLATE
+
+def setup_logging(verbose: bool = False) -> logging.Logger:
+    """Set up logging configuration."""
+    level = logging.DEBUG if verbose else logging.INFO
+    logging.basicConfig(
+        level=level,
+        format='%(message)s'
+    )
+    return logging.getLogger(__name__)
 
 def parse_arguments():
     parser = argparse.ArgumentParser(
@@ -21,8 +30,8 @@ def parse_arguments():
     parser.add_argument(
         '--template',
         type=str,
-        default='config/templates/default.yaml',
-        help='Path to the YAML template file (default: config/templates/default.yaml)'
+        default=DEFAULT_YAML_TEMPLATE,
+        help=f'Path to the YAML template file (default: {DEFAULT_YAML_TEMPLATE})'
     )
     parser.add_argument(
         '--verbose',
@@ -35,10 +44,11 @@ def main():
     args = parse_arguments()
     logger = setup_logging(verbose=args.verbose)
 
-    # Validate input files
-    pdf_path = Path(args.input_pdf)
-    template_path = Path(args.template)
+    # Convert paths to Path objects
+    pdf_path = Path(args.input_pdf).resolve()
+    template_path = Path(args.template).resolve()
     
+    # Validate input files
     if not pdf_path.exists():
         logger.error(f"Input PDF file not found: {pdf_path}")
         sys.exit(1)
@@ -51,30 +61,36 @@ def main():
         logger.info(f"Processing PDF: {pdf_path}")
         extractor = PDFTextExtractor(str(pdf_path))
         raw_text = extractor.extract_text()
-
-        # Process and structure the content
-        logger.info("Analyzing content structure")
-        parser = ContentParser()
-        structured_content = parser.parse(raw_text)
+        
+        if not raw_text.strip():
+            logger.error("No text could be extracted from the PDF")
+            sys.exit(1)
+        logger.debug(f"Extracted {len(raw_text)} characters from PDF")
 
         # Process with OpenAI
         logger.info("Processing with OpenAI")
         ai_client = OpenAIClient()
-        processed_content = ai_client.process_content(structured_content)
+        try:
+            processed_content = ai_client.process_pdf_text(raw_text)
+            logger.debug(f"Received response from OpenAI with {len(processed_content)} datasets")
+        except OpenAIClientError as e:
+            logger.error(f"OpenAI processing failed: {e}")
+            sys.exit(1)
 
-        # Generate YAML output
+        # Generate and save YAML output
         logger.info("Generating YAML output")
-        generator = YAMLGenerator(template_path)
-        yaml_output = generator.generate(processed_content)
-
-        # Write output
-        output_path = pdf_path.with_suffix('.yaml')
-        with open(output_path, 'w') as f:
-            f.write(yaml_output)
-        logger.info(f"Output written to: {output_path}")
+        try:
+            generator = YAMLGenerator(template_path)
+            output_path = generator.save(processed_content, pdf_path)
+            logger.info(f"Output written to: {output_path}")
+        except YAMLGeneratorError as e:
+            logger.error(f"YAML generation failed: {e}")
+            sys.exit(1)
 
     except Exception as e:
-        logger.error(f"Error processing PDF: {e}")
+        logger.error(f"Unexpected error while processing PDF: {str(e)}")
+        if args.verbose:
+            logger.exception("Detailed error information:")
         sys.exit(1)
 
 if __name__ == '__main__':

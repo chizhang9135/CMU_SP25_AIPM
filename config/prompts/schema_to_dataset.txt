@@ -29,6 +29,8 @@ Output Format:
       {special_notes}
 ```
 
+Note: Ensure all column names are in quotes and each is on a new line. The description must follow the exact format above.
+
 Example Output:
 ```yaml
 StockData:

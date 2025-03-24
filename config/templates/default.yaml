@@ -42,7 +42,7 @@ special_notes_format: |
 #
 #       Additional notes about data handling...
 
-# Output format validation schema
+# YAML validation schema for dataset descriptions
 format:
   type: object
   properties:

@@ -2,12 +2,18 @@ import fitz  # PyMuPDF
 import io
 from PIL import Image
 import pytesseract
-pytesseract.pytesseract.tesseract_cmd = "/opt/homebrew/bin/tesseract"
+import shutil
+import logging
 
 class PDFTextExtractor:
     def __init__(self, file_path):
         self.file_path = file_path
         self.text = ""
+        # Find tesseract executable
+        tesseract_path = shutil.which('tesseract')
+        if not tesseract_path:
+            raise RuntimeError("Tesseract is not installed or not in PATH")
+        pytesseract.pytesseract.tesseract_cmd = tesseract_path
 
     def extract_text(self):
         """Extracts selectable text, OCRs embedded images, and full-page images if needed."""
@@ -38,7 +44,8 @@ class PDFTextExtractor:
 
                 self.text = "".join(all_text)
         except Exception as e:
-            print(f"Error reading PDF with OCR: {e}")
+            logging.error(f"Error reading PDF with OCR: {e}")
+            raise
         return self.text
 
 # Example usage
