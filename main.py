@@ -34,6 +34,11 @@ def parse_arguments():
         help=f'Path to the YAML template file (default: {DEFAULT_YAML_TEMPLATE})'
     )
     parser.add_argument(
+        '--ground-truth',
+        type=str,
+        help='Path to the ground truth YAML file for evaluation'
+    )
+    parser.add_argument(
         '--verbose',
         action='store_true',
         help='Enable verbose output'
@@ -47,7 +52,7 @@ def main():
     # Convert paths to Path objects
     pdf_path = Path(args.input_pdf).resolve()
     template_path = Path(args.template).resolve()
-    
+
     # Validate input files
     if not pdf_path.exists():
         logger.error(f"Input PDF file not found: {pdf_path}")
@@ -61,7 +66,7 @@ def main():
         logger.info(f"Processing PDF: {pdf_path}")
         extractor = PDFTextExtractor(str(pdf_path))
         raw_text = extractor.extract_text()
-        
+
         if not raw_text.strip():
             logger.error("No text could be extracted from the PDF")
             sys.exit(1)
@@ -83,6 +88,34 @@ def main():
             generator = YAMLGenerator(template_path)
             output_path = generator.save(processed_content, pdf_path)
             logger.info(f"Output written to: {output_path}")
+
+            # Run metrics if ground truth is provided
+            if args.ground_truth:
+                from metrics import MetricsEvaluator
+                try:
+                    logger.info("Running metrics evaluation")
+                    evaluator = MetricsEvaluator(args.ground_truth, output_path)
+                    dataset_key = next(iter(evaluator.ground_truth))
+
+                    acc_msg, acc = evaluator.accuracy(dataset_key)
+                    cov_msg, cov = evaluator.coverage(dataset_key)
+
+                    report_path = output_path.with_suffix('.txt')
+                    with open(report_path, 'w') as report_file:
+                        report_file.write("--- Accuracy Report ---\n")
+                        report_file.write(acc_msg + "\n")
+                        report_file.write(f"Accuracy: {acc:.2%}\n\n")
+                        report_file.write("--- Coverage Report ---\n")
+                        report_file.write(cov_msg + "\n")
+                        report_file.write(f"Coverage: {cov:.2%}\n")
+
+                    logger.info(f"Metrics report written to: {report_path}")
+
+                except Exception as e:
+                    logger.error(f"Evaluation failed: {str(e)}")
+                    if args.verbose:
+                        logger.exception("Detailed error during evaluation:")
+
         except YAMLGeneratorError as e:
             logger.error(f"YAML generation failed: {e}")
             sys.exit(1)
