@@ -43,6 +43,7 @@ Basic usage:
 python main.py input.pdf
 ```
 
+for metrics report generation, see metrics_log.md
 With verbose output:
 ```bash
 python main.py input.pdf --verbose
