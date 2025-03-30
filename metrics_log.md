@@ -16,7 +16,7 @@ The metrics system supports the following evaluations:
 ## How to Use
 
 ```bash
-python3 main.py pdf_path ground_truth_yaml_path
+python3 main.py pdf_path --ground-truth ground_truth_yaml_path
 ```
 
 ### Prerequisites

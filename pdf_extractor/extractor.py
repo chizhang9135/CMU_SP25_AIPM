@@ -47,16 +47,3 @@ class PDFTextExtractor:
             logging.error(f"Error reading PDF with OCR: {e}")
             raise
         return self.text
-
-# Example usage
-extractor = PDFTextExtractor("test_files/scanned.pdf")
-text = extractor.extract_text()
-print(text)
-
-extractor = PDFTextExtractor("test_files/text_with_img.pdf")
-text = extractor.extract_text()
-print(text)
-
-extractor = PDFTextExtractor("test_files/example.pdf")
-text = extractor.extract_text()
-print(text)
