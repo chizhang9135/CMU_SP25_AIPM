@@ -1,0 +1,53 @@
+Mushroom:
+- role: system
+  content: '[Dataset Description]:
+
+    This dataset includes descriptions of gilled mushrooms in the Agaricus and Lepiota families, used to classify them as edible or poisonous.
+
+    "class": categorical, edible or poisonous (e, p)
+
+    "cap-shape": categorical, shape of mushroom cap (e.g., bell, conical, convex)
+
+    "cap-surface": categorical, surface texture of cap (e.g., smooth, scaly)
+
+    "cap-color": categorical, color of the cap (e.g., brown, buff, red)
+
+    "bruises": categorical, presence of bruises (t, f)
+
+    "odor": categorical, odor of mushroom (e.g., almond, foul, pungent)
+
+    "gill-attachment": categorical, gill attachment to stalk
+
+    "gill-spacing": categorical, gill spacing (close, crowded, distant)
+
+    "gill-size": categorical, size of gills (broad, narrow)
+
+    "gill-color": categorical, color of gills
+
+    "stalk-shape": categorical, shape of the stalk
+
+    "stalk-root": categorical, root type (some values may be missing)
+
+    "stalk-surface-above-ring": categorical, surface above the ring
+
+    "stalk-surface-below-ring": categorical, surface below the ring
+
+    "stalk-color-above-ring": categorical, color above the ring
+
+    "stalk-color-below-ring": categorical, color below the ring
+
+    "veil-type": categorical, type of veil (always partial)
+
+    "veil-color": categorical, veil color
+
+    "ring-number": categorical, number of rings
+
+    "ring-type": categorical, type of ring
+
+    "spore-print-color": categorical, color of the spore print
+
+    "population": categorical, population density
+
+    "habitat": categorical, habitat type (e.g., woods, urban)
+
+    You can access the entire dataset via the "data" variable.'

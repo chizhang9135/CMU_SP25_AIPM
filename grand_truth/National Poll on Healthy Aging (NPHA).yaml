@@ -1,0 +1,37 @@
+NPHA:
+- role: system
+  content: '[Dataset Description]:
+
+    This dataset comes from the National Poll on Healthy Aging and includes responses from Americans aged 50+ on health and sleep issues.
+
+    "Number_of_Doctors_Visited": categorical, total number of different doctors seen (e.g., 0–1, 2–3, 4+)
+
+    "Age": categorical, age group (e.g., 50–64, 65–80)
+
+    "Physical_Health": categorical, self-assessed physical health (excellent to poor)
+
+    "Mental_Health": categorical, self-assessed mental health (excellent to poor)
+
+    "Dental_Health": categorical, self-assessed dental health (excellent to poor)
+
+    "Employment": categorical, employment status
+
+    "Stress_Keeps_Patient_from_Sleeping": categorical, stress affecting sleep (yes/no)
+
+    "Medication_Keeps_Patient_from_Sleeping": categorical, medication affecting sleep (yes/no)
+
+    "Pain_Keeps_Patient_from_Sleeping": categorical, pain affecting sleep (yes/no)
+
+    "Bathroom_Needs_Keeps_Patient_from_Sleeping": categorical, bathroom needs affecting sleep (yes/no)
+
+    "Uknown_Keeps_Patient_from_Sleeping": categorical, unknown reasons affecting sleep (yes/no)
+
+    "Trouble_Sleeping": categorical, general difficulty sleeping (yes/no)
+
+    "Prescription_Sleep_Medication": categorical, frequency of prescribed sleep medication use
+
+    "Race": categorical, race/ethnicity
+
+    "Gender": categorical, gender
+
+    You can access the entire dataset via the "data" variable.'
