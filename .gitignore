@@ -38,3 +38,6 @@ output/
 *.log 
 
 .DS_Store
+
+.idea/
+.vscode/
