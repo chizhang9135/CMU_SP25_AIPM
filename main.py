@@ -2,6 +2,8 @@
 import argparse
 import sys
 import logging
+import time
+import tracemalloc
 from pathlib import Path
 
 from pdf_extractor.extractor import PDFTextExtractor
@@ -70,17 +72,39 @@ def main():
         if not raw_text.strip():
             logger.error("No text could be extracted from the PDF")
             sys.exit(1)
-        logger.debug(f"Extracted {len(raw_text)} characters from PDF")
+        if args.verbose:
+            logger.debug(f"Extracted {len(raw_text)} characters from PDF")
 
-        # Process with OpenAI
+        # Estimate input tokens
+        with open(template_path, 'r') as tf:
+            template_text = tf.read()
+        input_words = len(raw_text.split()) + len(template_text.split())
+        input_tokens = input_words * 4
+
+        # Process with OpenAI (measuring latency and memory)
         logger.info("Processing with OpenAI")
         ai_client = OpenAIClient()
         try:
+            tracemalloc.start()
+            start_time = time.time()
             processed_content = ai_client.process_pdf_text(raw_text)
+            end_time = time.time()
+            current, peak = tracemalloc.get_traced_memory()
+            tracemalloc.stop()
+
+            latency_seconds = end_time - start_time
+            memory_mb = peak / (1024 * 1024)
+
             logger.debug(f"Received response from OpenAI with {len(processed_content)} datasets")
         except OpenAIClientError as e:
             logger.error(f"OpenAI processing failed: {e}")
             sys.exit(1)
+
+        # Estimate output tokens (based on YAML word count)
+        from yaml import dump
+        yaml_output_text = dump(processed_content)
+        output_words = len(yaml_output_text.split())
+        output_tokens = output_words * 4
 
         # Generate and save YAML output
         logger.info("Generating YAML output")
@@ -91,7 +115,7 @@ def main():
 
             # Run metrics if ground truth is provided
             if args.ground_truth:
-                from metrics import MetricsEvaluator
+                from metrics.metrics import MetricsEvaluator
                 try:
                     logger.info("Running metrics evaluation")
                     evaluator = MetricsEvaluator(args.ground_truth, output_path)
@@ -107,7 +131,13 @@ def main():
                         report_file.write(f"Accuracy: {acc:.2%}\n\n")
                         report_file.write("--- Coverage Report ---\n")
                         report_file.write(cov_msg + "\n")
-                        report_file.write(f"Coverage: {cov:.2%}\n")
+                        report_file.write(f"Coverage: {cov:.2%}\n\n")
+                        report_file.write("--- Performance Report ---\n")
+                        report_file.write(f"Latency: {latency_seconds:.2f} seconds\n")
+                        report_file.write(f"Memory Usage: {memory_mb:.2f} MB\n\n")
+                        report_file.write("--- Token Usage ---\n")
+                        report_file.write(f"Input Tokens (estimated): {input_tokens}\n")
+                        report_file.write(f"Output Tokens (estimated): {output_tokens}\n")
 
                     logger.info(f"Metrics report written to: {report_path}")
 
