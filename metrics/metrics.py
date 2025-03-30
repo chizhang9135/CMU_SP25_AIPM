@@ -84,14 +84,6 @@ class MetricsEvaluator:
 
         return result_msg, cov
 
-    def latency(self):
-        pass
-
-    def memory(self):
-        pass
-
-    def token(self):
-        pass
 
     @staticmethod
     def help():
@@ -107,8 +99,6 @@ Methods:
 
 - coverage(dataset_key: str) -> str, float
     Return percentage of features with names/types present in output, and list any missing descriptions.
-
-- latency(), memory(), token(): Placeholders for future metrics.
 
 Expected YAML format:
 Each file is a dictionary with dataset name as key and a list of messages (with 'role' and 'content') as value.
