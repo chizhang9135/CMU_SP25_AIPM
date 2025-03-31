@@ -1,0 +1,46 @@
+BikeSharing:
+- role: system
+  content: '[Dataset Description]:
+
+    This dataset contains the hourly and daily count of rental bikes from the Capital Bikeshare system, along with corresponding weather and seasonal information for the years 2011 and 2012.
+
+
+    "instant": integer, record index
+
+    "dteday": date, the date of the record in YYYY-MM-DD format
+
+    "season": categorical, indicates the season (1:winter, 2:spring, 3:summer, 4:fall)
+
+    "yr": categorical, indicates the year (0: 2011, 1: 2012)
+
+    "mnth": categorical, indicates the month (1 to 12)
+
+    "hr": categorical, indicates the hour of the day (0 to 23)
+
+    "holiday": binary, indicates if the day is a holiday (1 for holiday, 0 otherwise)
+
+    "weekday": categorical, indicates the day of the week (0 to 6)
+
+    "workingday": binary, indicates if the day is neither a weekend nor a holiday (1 for working day, 0 otherwise)
+
+    "weathersit": categorical, indicates the weather situation (1: Clear, Few clouds, Partly cloudy, 2: Mist + Cloudy, 3: Light Snow, Rain, 4: Heavy Rain + Ice Pallets + Snow)
+
+    "temp": continuous, normalized temperature in Celsius derived from (t-t_min)/(t_max-t_min)
+
+    "atemp": continuous, normalized feeling temperature in Celsius derived from (t-t_min)/(t_max-t_min)
+
+    "hum": continuous, normalized humidity (values divided by 100)
+
+    "windspeed": continuous, normalized wind speed (values divided by 67)
+
+    "casual": integer, count of casual users
+
+    "registered": integer, count of registered users
+
+    "cnt": integer, total count of rental bikes including both casual and registered users
+
+
+    You can access the entire dataset via the "data" variable.
+
+
+    Note: The dataset does not contain any missing values. The temperature, humidity, and wind speed values are normalized. The dataset is suitable for regression tasks.'

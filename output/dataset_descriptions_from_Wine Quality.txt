@@ -1,0 +1,25 @@
+--- Accuracy Report ---
+Wrong type for feature 'fixed_acidity': expected ': continuous', got ': float'
+Wrong type for feature 'volatile_acidity': expected ': continuous', got ': float'
+Wrong type for feature 'citric_acid': expected ': continuous', got ': float'
+Wrong type for feature 'residual_sugar': expected ': continuous', got ': float'
+Wrong type for feature 'chlorides': expected ': continuous', got ': float'
+Wrong type for feature 'free_sulfur_dioxide': expected ': continuous', got ': float'
+Wrong type for feature 'total_sulfur_dioxide': expected ': continuous', got ': float'
+Wrong type for feature 'density': expected ': continuous', got ': float'
+Wrong type for feature 'pH': expected ': continuous', got ': float'
+Wrong type for feature 'sulphates': expected ': continuous', got ': float'
+Wrong type for feature 'alcohol': expected ': continuous', got ': float'
+Accuracy: 15.38%
+
+--- Coverage Report ---
+All features are described.
+Coverage: 100.00%
+
+--- Performance Report ---
+Latency: 7.17 seconds
+Memory Usage: 0.63 MB
+
+--- Token Usage ---
+Input Tokens (estimated): 2408
+Output Tokens (estimated): 948

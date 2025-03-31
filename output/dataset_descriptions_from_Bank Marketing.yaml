@@ -1,0 +1,46 @@
+BankMarketing:
+- role: system
+  content: '[Dataset Description]:
+
+    This dataset contains information related to direct marketing campaigns conducted by a Portuguese banking institution, specifically focusing on phone calls made to clients to determine if they would subscribe to a term deposit.
+
+
+    "age": integer, the age of the client
+
+    "job": categorical, the type of job held by the client (e.g., ''admin.'', ''blue-collar'', ''entrepreneur'', ''housemaid'', ''management'', ''retired'', ''self-employed'', ''services'', ''student'', ''technician'', ''unemployed'', ''unknown'')
+
+    "marital": categorical, the marital status of the client (e.g., ''divorced'', ''married'', ''single'', ''unknown''; note: ''divorced'' includes those who are widowed)
+
+    "education": categorical, the education level of the client (e.g., ''basic.4y'', ''basic.6y'', ''basic.9y'', ''high.school'', ''illiterate'', ''professional.course'', ''university.degree'', ''unknown'')
+
+    "default": binary, indicates if the client has credit in default (1 = yes, 0 = no)
+
+    "balance": integer, the average yearly balance of the client in euros
+
+    "housing": binary, indicates if the client has a housing loan (1 = yes, 0 = no)
+
+    "loan": binary, indicates if the client has a personal loan (1 = yes, 0 = no)
+
+    "contact": categorical, the communication type used to contact the client (e.g., ''cellular'', ''telephone'')
+
+    "day_of_week": date, the last contact day of the week
+
+    "month": date, the last contact month of the year (e.g., ''jan'', ''feb'', ''mar'', ..., ''nov'', ''dec'')
+
+    "duration": integer, the duration of the last contact in seconds (note: this attribute significantly affects the target variable)
+
+    "campaign": integer, the number of contacts performed during this campaign for this client (including the last contact)
+
+    "pdays": integer, the number of days since the client was last contacted from a previous campaign (-1 means the client was not previously contacted)
+
+    "previous": integer, the number of contacts performed before this campaign for this client
+
+    "poutcome": categorical, the outcome of the previous marketing campaign (e.g., ''failure'', ''nonexistent'', ''success'')
+
+    "y": binary, indicates if the client subscribed to a term deposit (1 = yes, 0 = no)
+
+
+    You can access the entire dataset via the "data" variable.
+
+
+    Note: The "duration" variable should only be used for benchmarking purposes as it is not known before a call is made. All categorical variables should be handled appropriately for analysis.'

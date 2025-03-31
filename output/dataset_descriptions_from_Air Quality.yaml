@@ -1,0 +1,42 @@
+AirQuality:
+- role: system
+  content: '[Dataset Description]:
+
+    This dataset contains 9358 instances of hourly averaged responses from an array of 5 metal oxide chemical sensors embedded in an Air Quality Chemical Multisensor Device. The device was located in a significantly polluted area at road level within an Italian city, recording data on various air quality metrics.
+
+
+    "Date": date, the date of the recorded measurements in DD/MM/YYYY format
+
+    "Time": categorical, the time of day when the measurements were taken in HH.MM.SS format
+
+    "CO(GT)": integer, true hourly averaged concentration of CO in mg/m^3 (reference analyzer)
+
+    "PT08.S1(CO)": categorical, hourly averaged sensor response nominally targeted at CO
+
+    "NMHC(GT)": integer, true hourly averaged overall Non-Methanic Hydrocarbons concentration in microg/m^3 (reference analyzer)
+
+    "C6H6(GT)": continuous, true hourly averaged Benzene concentration in microg/m^3 (reference analyzer)
+
+    "PT08.S2(NMHC)": categorical, hourly averaged sensor response nominally targeted at NMHC
+
+    "NOx(GT)": integer, true hourly averaged NOx concentration in ppb (reference analyzer)
+
+    "PT08.S3(NOx)": categorical, hourly averaged sensor response nominally targeted at NOx
+
+    "NO2(GT)": integer, true hourly averaged NO2 concentration in microg/m^3 (reference analyzer)
+
+    "PT08.S4(NO2)": categorical, hourly averaged sensor response nominally targeted at NO2
+
+    "PT08.S5(O3)": categorical, hourly averaged sensor response nominally targeted at O3
+
+    "T": continuous, temperature in degrees Celsius
+
+    "RH": continuous, relative humidity in percentage
+
+    "AH": continuous, absolute humidity
+
+
+    You can access the entire dataset via the "data" variable.
+
+
+    Note: The dataset contains missing values. It is recommended to handle these appropriately during analysis. The dataset is licensed under a Creative Commons Attribution 4.0 International (CC BY 4.0) license, allowing for sharing and adaptation with appropriate credit.'

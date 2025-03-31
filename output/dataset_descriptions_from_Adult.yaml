@@ -1,0 +1,42 @@
+Adult:
+- role: system
+  content: '[Dataset Description]:
+
+    This dataset contains census data used to predict whether an individual''s annual income exceeds $50K. It includes demographic information and various features related to employment and education.
+
+
+    "age": integer, represents the age of the individual
+
+    "workclass": categorical, indicates the type of employment (e.g., Private, Self-emp-inc)
+
+    "fnlwgt": integer, final weight assigned to individuals in the dataset
+
+    "education": categorical, highest level of education attained (e.g., Bachelors, HS-grad)
+
+    "education-num": integer, numerical representation of education level
+
+    "marital-status": categorical, marital status of the individual (e.g., Married-civ-spouse, Divorced)
+
+    "occupation": categorical, type of occupation (e.g., Tech-support, Sales)
+
+    "relationship": categorical, relationship status (e.g., Husband, Wife)
+
+    "race": categorical, race of the individual (e.g., White, Black)
+
+    "sex": binary, gender of the individual (Female, Male)
+
+    "capital-gain": integer, capital gains of the individual
+
+    "capital-loss": integer, capital losses of the individual
+
+    "hours-per-week": integer, number of hours worked per week
+
+    "native-country": categorical, country of origin (e.g., United-States, Canada)
+
+    "income": binary, indicates if income exceeds $50K (>50K, <=50K)
+
+
+    You can access the entire dataset via the "data" variable.
+
+
+    Note: The dataset contains missing values in some columns, such as "workclass" and "occupation". Ensure to handle these appropriately during analysis.'

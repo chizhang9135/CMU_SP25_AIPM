@@ -1,0 +1,28 @@
+OnlineRetail:
+- role: system
+  content: '[Dataset Description]:
+
+    This dataset contains transactional data for a UK-based online retail company, detailing all transactions that occurred between 01/12/2010 and 09/12/2011. The company primarily sells unique all-occasion gifts, with many customers being wholesalers.
+
+
+    "InvoiceNo": categorical, a 6-digit integral number uniquely assigned to each transaction. If this code starts with the letter ''c'', it indicates a cancellation.
+
+    "StockCode": categorical, a 5-digit integral number uniquely assigned to each distinct product.
+
+    "Description": categorical, the name of the product.
+
+    "Quantity": integer, the quantities of each product (item) per transaction.
+
+    "InvoiceDate": date, the day and time when each transaction was generated.
+
+    "UnitPrice": continuous, the product price per unit in sterling.
+
+    "CustomerID": categorical, a 5-digit integral number uniquely assigned to each customer.
+
+    "Country": categorical, the name of the country where each customer resides.
+
+
+    You can access the entire dataset via the "data" variable.
+
+
+    Note: The dataset does not contain any missing values. It is licensed under a Creative Commons Attribution 4.0 International (CC BY 4.0) license, allowing for sharing and adaptation for any purpose with appropriate credit.'

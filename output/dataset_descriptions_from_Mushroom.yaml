@@ -1,0 +1,58 @@
+MushroomDataset:
+- role: system
+  content: '[Dataset Description]:
+
+    This dataset includes descriptions of hypothetical samples corresponding to 23 species of gilled mushrooms in the Agaricus and Lepiota Family. Each species is identified as definitely edible, definitely poisonous, or of unknown edibility and not recommended.
+
+
+    "poisonous": categorical, indicates whether the mushroom is edible (e) or poisonous (p)
+
+    "cap-shape": categorical, describes the shape of the mushroom cap (bell=b, conical=c, convex=x, flat=f, knobbed=k, sunken=s)
+
+    "cap-surface": categorical, describes the surface texture of the cap (fibrous=f, grooves=g, scaly=y, smooth=s)
+
+    "cap-color": categorical, describes the color of the cap (brown=n, buff=b, cinnamon=c, gray=g, green=r, pink=p, purple=u, red=e, white=w, yellow=y)
+
+    "bruises": categorical, indicates if the mushroom bruises (bruises=t, no=f)
+
+    "odor": categorical, describes the odor of the mushroom (almond=a, anise=l, creosote=c, fishy=y, foul=f, musty=m, none=n, pungent=p, spicy=s)
+
+    "gill-attachment": categorical, describes how the gills are attached (attached=a, descending=d, free=f, notched=n)
+
+    "gill-spacing": categorical, describes the spacing of the gills (close=c, crowded=w, distant=d)
+
+    "gill-size": categorical, describes the size of the gills (broad=b, narrow=n)
+
+    "gill-color": categorical, describes the color of the gills (black=k, brown=n, buff=b, chocolate=h, gray=g, green=r, orange=o, pink=p, purple=u, red=e, white=w, yellow=y)
+
+    "stalk-shape": categorical, describes the shape of the stalk (enlarging=e, tapering=t)
+
+    "stalk-root": categorical, describes the type of stalk root (bulbous=b, club=c, cup=u, equal=e, rhizomorphs=z, rooted=r, missing=?)
+
+    "stalk-surface-above-ring": categorical, describes the surface texture of the stalk above the ring (fibrous=f, scaly=y, silky=k, smooth=s)
+
+    "stalk-surface-below-ring": categorical, describes the surface texture of the stalk below the ring (fibrous=f, scaly=y, silky=k, smooth=s)
+
+    "stalk-color-above-ring": categorical, describes the color of the stalk above the ring (brown=n, buff=b, cinnamon=c, gray=g, orange=o, pink=p, red=e, white=w, yellow=y)
+
+    "stalk-color-below-ring": categorical, describes the color of the stalk below the ring (brown=n, buff=b, cinnamon=c, gray=g, orange=o, pink=p, red=e, white=w, yellow=y)
+
+    "veil-type": categorical, describes the type of veil (partial=p, universal=u)
+
+    "veil-color": categorical, describes the color of the veil (brown=n, orange=o, white=w, yellow=y)
+
+    "ring-number": categorical, describes the number of rings (none=n, one=o, two=t)
+
+    "ring-type": categorical, describes the type of ring (cobwebby=c, evanescent=e, flaring=f, large=l, none=n, pendant=p, sheathing=s, zone=z)
+
+    "spore-print-color": categorical, describes the color of the spore print (black=k, brown=n, buff=b, chocolate=h, green=r, orange=o, purple=u, white=w, yellow=y)
+
+    "population": categorical, describes the population density (abundant=a, clustered=c, numerous=n, scattered=s, several=v, solitary=y)
+
+    "habitat": categorical, describes the habitat where the mushroom is found (grasses=g, leaves=l, meadows=m, paths=p, urban=u, waste=w, woods=d)
+
+
+    You can access the entire dataset via the "data" variable.
+
+
+    Note: The dataset contains missing values, particularly in the "stalk-root" column. The dataset is intended for classification tasks in biology.'

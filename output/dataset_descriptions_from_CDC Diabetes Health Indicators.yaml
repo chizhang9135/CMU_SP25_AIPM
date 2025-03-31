@@ -1,0 +1,58 @@
+CDC_Diabetes_Health_Indicators:
+- role: system
+  content: '[Dataset Description]:
+
+    This dataset contains healthcare statistics and lifestyle survey information about individuals in the US, focusing on their diabetes diagnosis and related health indicators.
+
+
+    "ID": integer, unique identifier for each patient
+
+    "Diabetes_binary": binary, indicates diabetes status (0 = no diabetes, 1 = prediabetes or diabetes)
+
+    "HighBP": binary, indicates if the individual has high blood pressure (0 = no, 1 = yes)
+
+    "HighChol": binary, indicates if the individual has high cholesterol (0 = no, 1 = yes)
+
+    "CholCheck": binary, indicates if the individual had a cholesterol check in the last 5 years (0 = no, 1 = yes)
+
+    "BMI": integer, Body Mass Index of the individual
+
+    "Smoker": binary, indicates if the individual has smoked at least 100 cigarettes in their lifetime (0 = no, 1 = yes)
+
+    "Stroke": binary, indicates if the individual has ever been told they had a stroke (0 = no, 1 = yes)
+
+    "HeartDiseaseorAttack": binary, indicates if the individual has coronary heart disease or myocardial infarction (0 = no, 1 = yes)
+
+    "PhysActivity": binary, indicates if the individual engaged in physical activity in the past 30 days (0 = no, 1 = yes)
+
+    "Fruits": binary, indicates if the individual consumes fruit at least once per day (0 = no, 1 = yes)
+
+    "Veggies": binary, indicates if the individual consumes vegetables at least once per day (0 = no, 1 = yes)
+
+    "HvyAlcoholConsump": binary, indicates if the individual is a heavy drinker (0 = no, 1 = yes)
+
+    "AnyHealthcare": binary, indicates if the individual has any form of health care coverage (0 = no, 1 = yes)
+
+    "NoDocbcCost": binary, indicates if the individual could not see a doctor due to cost in the past 12 months (0 = no, 1 = yes)
+
+    "GenHlth": integer, self-reported general health status on a scale from 1 (excellent) to 5 (poor)
+
+    "MentHlth": integer, number of days in the past 30 that mental health was not good (scale 1-30)
+
+    "PhysHlth": integer, number of days in the past 30 that physical health was not good (scale 1-30)
+
+    "DiffWalk": binary, indicates if the individual has serious difficulty walking or climbing stairs (0 = no, 1 = yes)
+
+    "Sex": binary, indicates the sex of the individual (0 = female, 1 = male)
+
+    "Age": integer, age category of the individual (13-level age category)
+
+    "Education": integer, education level of the individual (scale 1-6)
+
+    "Income": integer, income level of the individual (scale 1-8)
+
+
+    You can access the entire dataset via the "data" variable.
+
+
+    Note: The dataset contains sensitive demographic information such as gender, income, and education level. Cross-validation or a fixed train-test split is recommended for analysis. Data has been preprocessed to bucket age categories.'

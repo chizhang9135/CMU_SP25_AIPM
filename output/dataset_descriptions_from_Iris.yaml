@@ -1,0 +1,22 @@
+Iris:
+- role: system
+  content: '[Dataset Description]:
+
+    This dataset contains measurements of iris plants, specifically focusing on four features that describe the physical characteristics of the plants. It includes three classes of iris plants, each with 50 instances, making it a classic dataset for classification tasks in statistics and machine learning.
+
+
+    "sepal length": float, the length of the sepal in centimeters
+
+    "sepal width": float, the width of the sepal in centimeters
+
+    "petal length": float, the length of the petal in centimeters
+
+    "petal width": float, the width of the petal in centimeters
+
+    "class": categorical, the class of iris plant: Iris Setosa, Iris Versicolour, or Iris Virginica
+
+
+    You can access the entire dataset via the "data" variable.
+
+
+    Note: This dataset does not contain any missing values. It is widely used for evaluating classification methods and is licensed under a Creative Commons Attribution 4.0 International (CC BY 4.0) license.'
