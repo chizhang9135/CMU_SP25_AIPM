@@ -1,37 +1,38 @@
 Adult:
-- role: system
-  content: '[Dataset Description]:
+  - role: system
+    content: |
+      [Dataset Description]:
 
-    This dataset contains census data used to predict whether an individual's annual income exceeds $50K based on demographic and employment information.
+      This dataset contains census data used to predict whether an individual's annual income exceeds $50K based on demographic and employment information.
 
-    "age": integer, represents the age of the individual
+      "age": integer, represents the age of the individual
 
-    "workclass": categorical, indicates the type of employment (e.g., Private, Self-emp-not-inc)
+      "workclass": categorical, indicates the type of employment (e.g., Private, Self-emp-not-inc)
 
-    "fnlwgt": integer, represents the final weight assigned to the individual for census data analysis
+      "fnlwgt": integer, represents the final weight assigned to the individual for census data analysis
 
-    "education": categorical, indicates the highest level of education attained (e.g., Bachelors, HS-grad)
+      "education": categorical, indicates the highest level of education attained (e.g., Bachelors, HS-grad)
 
-    "education-num": integer, numeric representation of the education level
+      "education-num": integer, numeric representation of the education level
 
-    "marital-status": categorical, indicates the marital status of the individual (e.g., Married-civ-spouse, Divorced)
+      "marital-status": categorical, indicates the marital status of the individual (e.g., Married-civ-spouse, Divorced)
 
-    "occupation": categorical, indicates the individual's occupation (e.g., Tech-support, Sales)
+      "occupation": categorical, indicates the individual's occupation (e.g., Tech-support, Sales)
 
-    "relationship": categorical, indicates the individual's relationship status (e.g., Husband, Wife)
+      "relationship": categorical, indicates the individual's relationship status (e.g., Husband, Wife)
 
-    "race": categorical, indicates the race of the individual (e.g., White, Black)
+      "race": categorical, indicates the race of the individual (e.g., White, Black)
 
-    "sex": binary, indicates the sex of the individual (Female, Male)
+      "sex": binary, indicates the sex of the individual (Female, Male)
 
-    "capital-gain": integer, indicates the capital gains of the individual
+      "capital-gain": integer, indicates the capital gains of the individual
 
-    "capital-loss": integer, indicates the capital losses of the individual
+      "capital-loss": integer, indicates the capital losses of the individual
 
-    "hours-per-week": integer, indicates the number of hours worked per week
+      "hours-per-week": integer, indicates the number of hours worked per week
 
-    "native-country": categorical, indicates the country of origin of the individual (e.g., United-States, Mexico)
+      "native-country": categorical, indicates the country of origin of the individual (e.g., United-States, Mexico)
 
-    "income": binary, indicates whether the individual's income exceeds $50K (values: >50K, <=50K)
+      "income": binary, indicates whether the individual's income exceeds $50K (values: >50K, <=50K)
 
-    You can access the entire dataset via the "data" variable.'
+      You can access the entire dataset via the "data" variable.

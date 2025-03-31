@@ -1,17 +1,18 @@
 Iris:
-- role: system
-  content: '[Dataset Description]:
+  - role: system
+    content: |
+      [Dataset Description]:
 
-    This dataset contains measurements of iris flowers from three different species, used for classification tasks.
+      This dataset contains measurements of iris flowers from three different species, used for classification tasks.
 
-    "sepal length": continuous, length of the sepal in centimeters
+      "sepal length": continuous, length of the sepal in centimeters
 
-    "sepal width": continuous, width of the sepal in centimeters
+      "sepal width": continuous, width of the sepal in centimeters
 
-    "petal length": continuous, length of the petal in centimeters
+      "petal length": continuous, length of the petal in centimeters
 
-    "petal width": continuous, width of the petal in centimeters
+      "petal width": continuous, width of the petal in centimeters
 
-    "class": categorical, species of iris plant (Setosa, Versicolour, Virginica)
+      "class": categorical, species of iris plant (Setosa, Versicolour, Virginica)
 
-    You can access the entire dataset via the "data" variable.'
+      You can access the entire dataset via the "data" variable.

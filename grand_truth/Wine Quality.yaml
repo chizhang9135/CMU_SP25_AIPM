@@ -1,33 +1,34 @@
 WineQuality:
-- role: system
-  content: '[Dataset Description]:
+  - role: system
+    content: |
+      [Dataset Description]:
 
-    This dataset contains physicochemical and sensory data of Portuguese "Vinho Verde" wines, both red and white variants, collected to predict wine quality scores.
+      This dataset contains physicochemical and sensory data of Portuguese "Vinho Verde" wines, both red and white variants, collected to predict wine quality scores.
 
-    "fixed_acidity": continuous, measures the tartaric acid concentration, impacting wine stability and taste
+      "fixed_acidity": continuous, measures the tartaric acid concentration, impacting wine stability and taste
 
-    "volatile_acidity": continuous, indicates the amount of acetic acid in the wine, which at high levels can lead to an unpleasant vinegar taste
+      "volatile_acidity": continuous, indicates the amount of acetic acid in the wine, which at high levels can lead to an unpleasant vinegar taste
 
-    "citric_acid": continuous, contributes freshness and flavor; present in small quantities
+      "citric_acid": continuous, contributes freshness and flavor; present in small quantities
 
-    "residual_sugar": continuous, the amount of sugar left after fermentation; typically <4g/L but can vary
+      "residual_sugar": continuous, the amount of sugar left after fermentation; typically <4g/L but can vary
 
-    "chlorides": continuous, amount of salt in wine, affecting taste and preservation
+      "chlorides": continuous, amount of salt in wine, affecting taste and preservation
 
-    "free_sulfur_dioxide": continuous, the SO₂ that prevents microbial growth and oxidation
+      "free_sulfur_dioxide": continuous, the SO₂ that prevents microbial growth and oxidation
 
-    "total_sulfur_dioxide": continuous, total amount of SO₂ including bound and free forms
+      "total_sulfur_dioxide": continuous, total amount of SO₂ including bound and free forms
 
-    "density": continuous, related to the alcohol and sugar content of the wine
+      "density": continuous, related to the alcohol and sugar content of the wine
 
-    "pH": continuous, the inverse measure of acidity; affects flavor and preservation
+      "pH": continuous, the inverse measure of acidity; affects flavor and preservation
 
-    "sulphates": continuous, additive contributing to microbial stability and wine flavor
+      "sulphates": continuous, additive contributing to microbial stability and wine flavor
 
-    "alcohol": continuous, percentage of ethanol; higher alcohol often correlates with higher quality
+      "alcohol": continuous, percentage of ethanol; higher alcohol often correlates with higher quality
 
-    "quality": integer, sensory quality score assigned by human testers (0–10 scale)
+      "quality": integer, sensory quality score assigned by human testers (0–10 scale)
 
-    "color": categorical, specifies whether the wine sample is red or white
+      "color": categorical, specifies whether the wine sample is red or white
 
-    You can access the entire dataset via the "data" variable.'
+      You can access the entire dataset via the "data" variable.

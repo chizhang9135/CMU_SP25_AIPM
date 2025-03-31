@@ -1,23 +1,24 @@
 OnlineRetail:
-- role: system
-  content: '[Dataset Description]:
+  - role: system
+    content: |
+      [Dataset Description]:
 
-    This dataset contains transactional records from a UK-based online retailer between December 2010 and December 2011.
+      This dataset contains transactional records from a UK-based online retailer between December 2010 and December 2011.
 
-    "InvoiceNo": categorical, unique identifier for each transaction
+      "InvoiceNo": categorical, unique identifier for each transaction
 
-    "StockCode": categorical, unique identifier for each product
+      "StockCode": categorical, unique identifier for each product
 
-    "Description": categorical, name of the product
+      "Description": categorical, name of the product
 
-    "Quantity": integer, quantity of each product per transaction
+      "Quantity": integer, quantity of each product per transaction
 
-    "InvoiceDate": date, date and time when the transaction occurred
+      "InvoiceDate": date, date and time when the transaction occurred
 
-    "UnitPrice": continuous, price per product unit in sterling
+      "UnitPrice": continuous, price per product unit in sterling
 
-    "CustomerID": categorical, unique identifier for each customer
+      "CustomerID": categorical, unique identifier for each customer
 
-    "Country": categorical, country of the customer
+      "Country": categorical, country of the customer
 
-    You can access the entire dataset via the "data" variable.'
+      You can access the entire dataset via the "data" variable.

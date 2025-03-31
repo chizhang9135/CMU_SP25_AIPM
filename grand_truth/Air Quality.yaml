@@ -1,37 +1,38 @@
 AirQuality:
-- role: system
-  content: '[Dataset Description]:
+  - role: system
+    content: |
+      [Dataset Description]:
 
-    This dataset contains hourly averaged sensor data from an air quality monitoring device in an Italian city, used to predict pollution indicators.
+      This dataset contains hourly averaged sensor data from an air quality monitoring device in an Italian city, used to predict pollution indicators.
 
-    "Date": date, the calendar date of measurement (format: DD/MM/YYYY)
+      "Date": date, the calendar date of measurement (format: DD/MM/YYYY)
 
-    "Time": categorical, the time of measurement (format: HH.MM.SS)
+      "Time": categorical, the time of measurement (format: HH.MM.SS)
 
-    "CO(GT)": integer, true hourly averaged concentration of carbon monoxide in mg/m^3
+      "CO(GT)": integer, true hourly averaged concentration of carbon monoxide in mg/m^3
 
-    "PT08.S1(CO)": categorical, sensor response (nominally CO targeted)
+      "PT08.S1(CO)": categorical, sensor response (nominally CO targeted)
 
-    "NMHC(GT)": integer, true hourly averaged concentration of non-methane hydrocarbons in microg/m^3
+      "NMHC(GT)": integer, true hourly averaged concentration of non-methane hydrocarbons in microg/m^3
 
-    "C6H6(GT)": continuous, true hourly averaged concentration of benzene in microg/m^3
+      "C6H6(GT)": continuous, true hourly averaged concentration of benzene in microg/m^3
 
-    "PT08.S2(NMHC)": categorical, sensor response (nominally NMHC targeted)
+      "PT08.S2(NMHC)": categorical, sensor response (nominally NMHC targeted)
 
-    "NOx(GT)": integer, true hourly averaged concentration of NOx in ppb
+      "NOx(GT)": integer, true hourly averaged concentration of NOx in ppb
 
-    "PT08.S3(NOx)": categorical, sensor response (nominally NOx targeted)
+      "PT08.S3(NOx)": categorical, sensor response (nominally NOx targeted)
 
-    "NO2(GT)": integer, true hourly averaged concentration of NO2 in microg/m^3
+      "NO2(GT)": integer, true hourly averaged concentration of NO2 in microg/m^3
 
-    "PT08.S4(NO2)": categorical, sensor response (nominally NO2 targeted)
+      "PT08.S4(NO2)": categorical, sensor response (nominally NO2 targeted)
 
-    "PT08.S5(O3)": categorical, sensor response (nominally O3 targeted)
+      "PT08.S5(O3)": categorical, sensor response (nominally O3 targeted)
 
-    "T": continuous, temperature in Celsius
+      "T": continuous, temperature in Celsius
 
-    "RH": continuous, relative humidity in percentage
+      "RH": continuous, relative humidity in percentage
 
-    "AH": continuous, absolute humidity
+      "AH": continuous, absolute humidity
 
-    You can access the entire dataset via the "data" variable.'
+      You can access the entire dataset via the "data" variable.

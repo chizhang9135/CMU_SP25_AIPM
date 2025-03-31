@@ -1,41 +1,42 @@
 BikeSharing:
-- role: system
-  content: '[Dataset Description]:
+  - role: system
+    content: |
+      [Dataset Description]:
 
-    This dataset contains hourly and daily counts of bike rentals between 2011 and 2012 in the Capital Bikeshare system, along with weather and seasonal data.
+      This dataset contains hourly and daily counts of bike rentals between 2011 and 2012 in the Capital Bikeshare system, along with weather and seasonal data.
 
-    "instant": integer, record index
+      "instant": integer, record index
 
-    "dteday": date, date of the record
+      "dteday": date, date of the record
 
-    "season": categorical, season (1: winter, 2: spring, 3: summer, 4: fall)
+      "season": categorical, season (1: winter, 2: spring, 3: summer, 4: fall)
 
-    "yr": categorical, year (0: 2011, 1: 2012)
+      "yr": categorical, year (0: 2011, 1: 2012)
 
-    "mnth": categorical, month (1–12)
+      "mnth": categorical, month (1–12)
 
-    "hr": categorical, hour (0–23)
+      "hr": categorical, hour (0–23)
 
-    "holiday": binary, indicates whether the day is a holiday
+      "holiday": binary, indicates whether the day is a holiday
 
-    "weekday": categorical, day of the week
+      "weekday": categorical, day of the week
 
-    "workingday": binary, indicates if the day is neither a weekend nor holiday
+      "workingday": binary, indicates if the day is neither a weekend nor holiday
 
-    "weathersit": categorical, weather situation (1: clear, 2: mist, 3: light snow/rain, 4: heavy rain)
+      "weathersit": categorical, weather situation (1: clear, 2: mist, 3: light snow/rain, 4: heavy rain)
 
-    "temp": continuous, normalized temperature in Celsius
+      "temp": continuous, normalized temperature in Celsius
 
-    "atemp": continuous, normalized feeling temperature in Celsius
+      "atemp": continuous, normalized feeling temperature in Celsius
 
-    "hum": continuous, normalized humidity
+      "hum": continuous, normalized humidity
 
-    "windspeed": continuous, normalized wind speed
+      "windspeed": continuous, normalized wind speed
 
-    "casual": integer, count of casual users
+      "casual": integer, count of casual users
 
-    "registered": integer, count of registered users
+      "registered": integer, count of registered users
 
-    "cnt": integer, total count of bike rentals (target variable)
+      "cnt": integer, total count of bike rentals (target variable)
 
-    You can access the entire dataset via the "data" variable.'
+      You can access the entire dataset via the "data" variable.

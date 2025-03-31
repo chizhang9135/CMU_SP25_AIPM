@@ -1,41 +1,42 @@
 BankMarketing:
-- role: system
-  content: '[Dataset Description]:
+  - role: system
+    content: |
+      [Dataset Description]:
 
-    This dataset contains data from direct marketing campaigns by a Portuguese bank, aimed at predicting if clients would subscribe to a term deposit.
+      This dataset contains data from direct marketing campaigns by a Portuguese bank, aimed at predicting if clients would subscribe to a term deposit.
 
-    "age": integer, age of the client
+      "age": integer, age of the client
 
-    "job": categorical, type of job (e.g., admin., technician, services)
+      "job": categorical, type of job (e.g., admin., technician, services)
 
-    "marital": categorical, marital status (e.g., married, single, divorced)
+      "marital": categorical, marital status (e.g., married, single, divorced)
 
-    "education": categorical, education level (e.g., basic.4y, high.school, university.degree)
+      "education": categorical, education level (e.g., basic.4y, high.school, university.degree)
 
-    "default": binary, indicates if the client has credit in default
+      "default": binary, indicates if the client has credit in default
 
-    "balance": integer, average yearly balance in euros
+      "balance": integer, average yearly balance in euros
 
-    "housing": binary, indicates if the client has a housing loan
+      "housing": binary, indicates if the client has a housing loan
 
-    "loan": binary, indicates if the client has a personal loan
+      "loan": binary, indicates if the client has a personal loan
 
-    "contact": categorical, contact communication type (e.g., cellular, telephone)
+      "contact": categorical, contact communication type (e.g., cellular, telephone)
 
-    "day_of_week": date, last contact day of the week
+      "day_of_week": date, last contact day of the week
 
-    "month": date, last contact month
+      "month": date, last contact month
 
-    "duration": integer, last contact duration in seconds
+      "duration": integer, last contact duration in seconds
 
-    "campaign": integer, number of contacts during this campaign
+      "campaign": integer, number of contacts during this campaign
 
-    "pdays": integer, number of days since the last contact in a previous campaign
+      "pdays": integer, number of days since the last contact in a previous campaign
 
-    "previous": integer, number of previous contacts
+      "previous": integer, number of previous contacts
 
-    "poutcome": categorical, outcome of the previous marketing campaign
+      "poutcome": categorical, outcome of the previous marketing campaign
 
-    "y": binary, target variable indicating if the client subscribed a term deposit
+      "y": binary, target variable indicating if the client subscribed a term deposit
 
-    You can access the entire dataset via the "data" variable.'
+      You can access the entire dataset via the "data" variable.
