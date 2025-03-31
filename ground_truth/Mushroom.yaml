@@ -1,4 +1,4 @@
-Mushroom:
+MushroomDataset:
   - role: system
     content: |
       [Dataset Description]:

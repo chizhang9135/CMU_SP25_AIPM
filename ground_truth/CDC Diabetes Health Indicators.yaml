@@ -1,4 +1,4 @@
-DiabetesHealth:
+CDC_Diabetes_Health_Indicators:
   - role: system
     content: |
       [Dataset Description]:

@@ -1,0 +1,15 @@
+--- Accuracy Report ---
+Missing feature 'class'
+Accuracy: 95.65%
+
+--- Coverage Report ---
+Missing description for feature 'class'
+Coverage: 95.65%
+
+--- Performance Report ---
+Latency: 16.25 seconds
+Memory Usage: 0.75 MB
+
+--- Token Usage ---
+Input Tokens (estimated): 2936
+Output Tokens (estimated): 1608

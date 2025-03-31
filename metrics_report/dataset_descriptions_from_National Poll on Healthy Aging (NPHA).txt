@@ -1,0 +1,15 @@
+--- Accuracy Report ---
+Missing feature 'Uknown_Keeps_Patient_from_Sleeping'
+Accuracy: 93.33%
+
+--- Coverage Report ---
+Missing description for feature 'Uknown_Keeps_Patient_from_Sleeping'
+Coverage: 93.33%
+
+--- Performance Report ---
+Latency: 12.02 seconds
+Memory Usage: 0.75 MB
+
+--- Token Usage ---
+Input Tokens (estimated): 4180
+Output Tokens (estimated): 1556

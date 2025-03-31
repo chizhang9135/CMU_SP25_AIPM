@@ -1,0 +1,18 @@
+--- Accuracy Report ---
+Wrong type for feature 'sepal length': expected ': continuous', got ': float'
+Wrong type for feature 'sepal width': expected ': continuous', got ': float'
+Wrong type for feature 'petal length': expected ': continuous', got ': float'
+Wrong type for feature 'petal width': expected ': continuous', got ': float'
+Accuracy: 20.00%
+
+--- Coverage Report ---
+All features are described.
+Coverage: 100.00%
+
+--- Performance Report ---
+Latency: 3.84 seconds
+Memory Usage: 0.75 MB
+
+--- Token Usage ---
+Input Tokens (estimated): 2804
+Output Tokens (estimated): 564
