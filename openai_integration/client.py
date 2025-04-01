@@ -11,6 +11,7 @@ from config.constants import (
     OPENAI_MODEL,
     OPENAI_TEMPERATURE,
     DEFAULT_PROMPT_TEMPLATE,
+    DEFAULT_SCHEMA_VALIDATOR_PROMPT_TEMPLATE,
 )
 
 class OpenAIClientError(Exception):
@@ -34,7 +35,7 @@ class OpenAIClient:
         os.environ["OPENAI_API_KEY"] = OPENAI_API_KEY_ENV
         
         # Load prompt template
-        self.prompt_template = self._load_prompt_template()
+        self.prompt_template, self.schema_validator_prompt_template = self._load_prompt_template()
         
         # Initialize OpenAI client
         import openai
@@ -51,22 +52,33 @@ class OpenAIClient:
             TemplateError: If template file cannot be loaded
         """
         template_path = Path(DEFAULT_PROMPT_TEMPLATE)
+        schema_validator_template_path = Path(DEFAULT_SCHEMA_VALIDATOR_PROMPT_TEMPLATE)
         try:
+            template = ""
+            schema_validator_template = ""
             with open(template_path, 'r', encoding='utf-8') as f:
                 template = f.read().strip()
-                if not template:
+                if not template or template == "":
                     raise TemplateError("Prompt template file is empty")
-                return template
+
+            with open(schema_validator_template_path, 'r', encoding='utf-8') as f:
+                schema_validator_template = f.read().strip()
+                if not schema_validator_template or schema_validator_template == "":
+                    raise TemplateError("Schema validator prompt template file is empty")
+
+            return template, schema_validator_template
         except FileNotFoundError:
             raise TemplateError(
-                f"Prompt template not found at {template_path}"
+                f"Prompt template not found at {template_path} or {schema_validator_template_path}"
             )
         except Exception as e:
             raise TemplateError(f"Error loading prompt template: {e}")
 
-    def process_pdf_text(self, text: str) -> Dict[str, List[Dict[str, str]]]:
+    def gpt_inference(self, text: str, is_for_validation: bool = False, generated_schema: str = "") -> Dict[str, List[Dict[str, str]]]:
         """
-        Process PDF text content using OpenAI.
+        Do the gpt inference. 
+        If is_for_validation is false, we will process PDF text content using OpenAI.
+        If is_for_validation is true, we will let GPT to validate the generated schema and correct it if it is necessary.
         
         Args:
             text: Raw text extracted from PDF
@@ -79,14 +91,25 @@ class OpenAIClient:
         """
         try:
             # Create chat completion
-            response = self.client.chat.completions.create(
-                model=OPENAI_MODEL,
-                temperature=OPENAI_TEMPERATURE,
-                messages=[
-                    {"role": "system", "content": self.prompt_template},
-                    {"role": "user", "content": text}
-                ]
-            )
+            if (is_for_validation == True):
+                response = self.client.chat.completions.create(
+                    model=OPENAI_MODEL,
+                    temperature=OPENAI_TEMPERATURE,
+                    messages=[
+                        {"role": "system", "content": self.schema_validator_prompt_template},
+                        {"role": "user", "content": f"Here is database schema descriptions: {text}"},
+                        {"role": "user", "content": f"Here is generated schema: {generated_schema}"}
+                    ]
+                )
+            else:
+                response = self.client.chat.completions.create(
+                    model=OPENAI_MODEL,
+                    temperature=OPENAI_TEMPERATURE,
+                    messages=[
+                        {"role": "system", "content": self.prompt_template},
+                        {"role": "user", "content": text}
+                    ]
+                )
             
             # Parse response
             content = response.choices[0].message.content

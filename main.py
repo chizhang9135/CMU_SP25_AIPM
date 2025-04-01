@@ -45,6 +45,11 @@ def parse_arguments():
         action='store_true',
         help='Enable verbose output'
     )
+    parser.add_argument(
+        '--enable_schema_validator_agent',
+        type=bool,
+        help='If this is true, we will enable schema validator agent to correct generated schema if it has problems'
+    )
     return parser.parse_args()
 
 def main():
@@ -87,7 +92,7 @@ def main():
         try:
             tracemalloc.start()
             start_time = time.time()
-            processed_content = ai_client.process_pdf_text(raw_text)
+            processed_content = ai_client.gpt_inference(raw_text)
             end_time = time.time()
             current, peak = tracemalloc.get_traced_memory()
             tracemalloc.stop()
@@ -99,6 +104,25 @@ def main():
         except OpenAIClientError as e:
             logger.error(f"OpenAI processing failed: {e}")
             sys.exit(1)
+
+        # Enable schema validator agent
+        if args.enable_schema_validator_agent:
+            schema_validator_agent = OpenAIClient()
+            try:
+                tracemalloc.start()
+                start_time = time.time()
+                processed_content = ai_client.gpt_inference(raw_text, true, processed_content)
+                end_time = time.time()
+                current, peak = tracemalloc.get_traced_memory()
+                tracemalloc.stop()
+
+                latency_seconds = latency_seconds + end_time - start_time
+                memory_mb = memory_mb + peak / (1024 * 1024)
+
+                logger.debug(f"Received response from OpenAI with {len(processed_content)} datasets after validating by schema validator agent")
+            except OpenAIClientError as e:
+                logger.error(f"OpenAI processing failed: {e}")
+                sys.exit(1)
 
         # Estimate output tokens (based on YAML word count)
         from yaml import dump

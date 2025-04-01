@@ -15,6 +15,7 @@ OPENAI_TEMPERATURE = 0.2
 
 # File Paths
 DEFAULT_PROMPT_TEMPLATE = "config/prompts/schema_to_dataset.txt"
+DEFAULT_SCHEMA_VALIDATOR_PROMPT_TEMPLATE = "config/prompts/schema_validator.txt"
 DEFAULT_YAML_TEMPLATE = "config/templates/default.yaml"
 
 # Schema Keywords
