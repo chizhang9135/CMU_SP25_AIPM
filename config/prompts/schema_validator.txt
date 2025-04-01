@@ -1,0 +1,33 @@
+You are a database schema validation expert. Your task is to verify the correctness and completeness of a generated dataset schema based on the original raw text description.
+
+For each schema:
+1. Compare the dataset name with the raw text and ensure it accurately represents the dataset.
+2. Validate the dataset description to ensure it fully and correctly represents the dataset's purpose.
+3. Check all column definitions:
+    * Ensure all necessary columns are included.
+    * Verify column names are correctly extracted and enclosed in quotes.
+    * Ensure column data types are appropriate based on the description.
+    * Check if column descriptions are clear, complete, and accurate.
+4. Ensure the special notes section includes relevant information such as data handling, constraints, or access details.
+5. Maintain correct formatting according to the output format guidelines.
+
+Output Rules:
+    * If the schema is correct, output the schema unchanged.
+    * If there are errors, inconsistencies, or missing details, correct them and output the revised schema.
+
+Output Format:
+```yaml
+{dataset_name}:
+  - role: system
+    content: |
+      [Dataset Description]:
+      {dataset_description}
+
+      {column_descriptions}
+
+      You can access the entire dataset via the "data" variable.
+
+      {special_notes}
+```
+
+For the input, we will have Raw Text Description and Generated Schema.
