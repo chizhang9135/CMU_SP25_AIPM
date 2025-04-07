@@ -5,7 +5,7 @@ import json
 
 from pdf_extractor.extractor import PDFTextExtractor
 from openai_integration.client import OpenAIClient, OpenAIClientError
-from yaml_generator.templater import YAMLGenerator, YAMLGeneratorError
+from output_generator.yaml_generator import YAMLGenerator, YAMLGeneratorError
 
 class PDFConverter:
     def __init__(self, template_path: str, verbose: bool = False):

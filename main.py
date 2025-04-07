@@ -8,7 +8,7 @@ from pathlib import Path
 
 from pdf_extractor.extractor import PDFTextExtractor
 from openai_integration.client import OpenAIClient, OpenAIClientError
-from yaml_generator.templater import YAMLGenerator, YAMLGeneratorError
+from output_generator.yaml_generator import YAMLGenerator, YAMLGeneratorError
 from config.constants import DEFAULT_YAML_TEMPLATE
 
 def setup_logging(verbose: bool = False) -> logging.Logger:
