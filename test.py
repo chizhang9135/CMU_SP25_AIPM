@@ -3,7 +3,7 @@ from pathlib import Path
 
 def test_pdf_converter():
     # Sample test PDF path (replace with an actual small, valid PDF for local testing)
-    sample_pdf = "ground_truth/Adult.yaml"
+    sample_pdf = "pdf_files/Adult.pdf"
     template_path = "config/templates/default.yaml"
 
     assert Path(sample_pdf).exists(), "Sample PDF not found."
