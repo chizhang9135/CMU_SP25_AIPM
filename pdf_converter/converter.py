@@ -48,6 +48,23 @@ class PDFConverter:
         # TODO: Generate YAML output
         # TODO: Create JSON response following ApiSpec.md
         # TODO: Return YAML download URL and JSON response
+
+        # TODO: DELETE BELOW (FOR TESTING)
+        self.logger.info(f"Simulating conversion for: {pdf_path}")
+
+        dummy_yaml_path = str(Path("ground_truth/Adult.yaml").resolve())
+
+        dummy_response = {
+            "status": "success",
+            "input_file": pdf_path,
+            "output_yaml": dummy_yaml_path,
+            "dataset": "Adult",
+            "columns_extracted": 14,
+            "notes": "This is a mock response for testing purposes."
+        }
+
+        return dummy_yaml_path, dummy_response
+        # TODO DELETE ABOVE
         
         raise NotImplementedError("PDF conversion not implemented")
     
