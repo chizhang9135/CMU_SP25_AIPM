@@ -61,8 +61,8 @@ python main.py input.pdf --ground-truth ground_truth/input.yaml --verbose
 This generates a YAML file in the `output/` folder and, if ground truth is provided, a metrics report in `.txt` format.
 
 ---
-
-### 🚀 FastAPI Web Service (`leniency_app.py`)
+### FastAPI Web Service (`app.py`) working in progress
+### 🚀 FastAPI Web Service (`leniency_app.py`) deprecated
 To launch the FastAPI server:
 
 ```bash
