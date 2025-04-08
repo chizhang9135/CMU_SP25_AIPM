@@ -23,7 +23,7 @@ def evaluate_yaml_confidence(yaml_path: str, openai_client: OpenAIClient) -> flo
         A confidence score between 0 and 1.
     """
     try:
-        with open(yaml_path, 'r', encoding='utf-8') as f:
+        with open(yaml_path, "r", encoding="utf-8") as f:
             yaml_content = f.read().strip()
     except Exception:
         return 0.0
@@ -34,35 +34,25 @@ def evaluate_yaml_confidence(yaml_path: str, openai_client: OpenAIClient) -> flo
         f"YAML Content:\n{yaml_content}"
     )
     try:
-        # Assume the OpenAIClient provides a method evaluate_prompt() which returns a score as string.
         response = openai_client.evaluate_prompt(prompt)
         score = float(response.strip())
         return max(0.0, min(1.0, score))
     except Exception:
-        # Fallback: simple schema validation.
+        # Fallback: simplified validation for your YAML prompt format.
         try:
             parsed = yaml.safe_load(yaml_content)
-            # Check that parsed content is a dict with a non-empty "tables" key.
-            if isinstance(parsed, dict) and "tables" in parsed and isinstance(parsed["tables"], list) and parsed[
-                "tables"]:
-                # For each table, check that each field contains "name", "type", and "description"
-                valid = True
-                for table in parsed["tables"]:
-                    if "fields" not in table or not isinstance(table["fields"], list) or not table["fields"]:
-                        valid = False
-                        break
-                    for field in table["fields"]:
-                        if not all(k in field for k in ["name", "type", "description"]):
-                            valid = False
-                            break
-                    if not valid:
-                        break
-                return 1.0 if valid else 0.0
+            # Expect a single top-level key (the dataset name) with a list of entries.
+            if isinstance(parsed, dict) and len(parsed) == 1:
+                top_key = next(iter(parsed))
+                entries = parsed[top_key]
+                if isinstance(entries, list) and any(entry.get("role") == "system" and "content" in entry for entry in entries):
+                    return 1.0
+                else:
+                    return 0.0
             else:
                 return 0.0
         except Exception:
             return 0.0
-
 
 def transform_yaml_to_json(yaml_path: str, confidence: float, yaml_download_url: str) -> Dict[str, Any]:
     """
