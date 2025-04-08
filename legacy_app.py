@@ -14,10 +14,8 @@ client = OpenAI(api_key=OPENAI_API_KEY_ENV)
 
 def get_confidence(feature_text: str, model: str = "gpt-4", temperature: float = 0.2) -> float:
     prompt = f"""
-You are evaluating the clarity and correctness of dataset feature definitions.
-For the following line, rate your confidence (from 0.00 to 100.00) that the column name, type, and description are all correct and complete.
-
-Only respond with a number like 97.25 or 83.00. No explanation.
+You are evaluating the clarity and confidence of dataset feature definitions.
+For the following line, rate your confidence (from 0 to 100) that the column name, type, and description are all correct and complete. Only respond with a number like 97.25 or 83.00. No explanation.
 
 Line:
 {feature_text}
