@@ -106,7 +106,7 @@ Visit [http://localhost:8000/docs](http://localhost:8000/docs) for the Swagger U
 **Endpoints:**
 
 - `POST /convert/` – Convert PDF to YAML
-- `POST /convert-with-metrics/` – Convert and evaluate with ground truth
+- `POST /convert-with-metrics/` – Convert and evaluate with ground truth and generate a report under output (not intent for display, for debug only)
 
 #### 🧪 Experimental API (`experiment_app.py`)
 
