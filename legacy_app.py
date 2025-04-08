@@ -8,7 +8,7 @@ import subprocess
 
 app = FastAPI()
 
-@app.post("/run-main/")
+@app.post("/convert/")
 async def run_main_basic(pdf: UploadFile = File(...)):
     try:
         # Save uploaded PDF
@@ -37,7 +37,7 @@ async def run_main_basic(pdf: UploadFile = File(...)):
         return JSONResponse(status_code=500, content={"error": str(e)})
 
 
-@app.post("/run-main-with-metrics/")
+@app.post("/convert-with-metrics/")
 async def run_main_with_metrics(
     pdf: UploadFile = File(...),
     ground_truth: UploadFile = File(...)

@@ -1,6 +1,8 @@
 # PDF to YAML Schema Converter
 
-A command-line application that processes PDF files containing database schema descriptions and generates structured YAML output. The application uses OpenAI's language models to understand and structure the content, making it easier to integrate with other tools and workflows.
+A command-line and API-based application that processes PDF files containing database schema descriptions and generates structured YAML output. The application uses OpenAI's language models to understand and structure the content, making it easier to integrate with other tools and workflows.
+
+---
 
 ## Features
 
@@ -9,73 +11,108 @@ A command-line application that processes PDF files containing database schema d
 - Processes schema descriptions using OpenAI
 - Generates standardized YAML output
 - Validates output structure
+- Evaluates accuracy, coverage, performance (optional)
+- FastAPI support for API-based conversion
 - Comprehensive error handling
+
+---
 
 ## Installation
 
 ### 1. Prerequisites
-
 - Python 3.13+
 - Tesseract OCR
 
-#### Installing Tesseract OCR:
+Install Tesseract:
 - **macOS:** `brew install tesseract`
 - **Ubuntu/Debian:** `sudo apt install tesseract-ocr`
 - **Windows:** Download from [Tesseract GitHub](https://github.com/tesseract-ocr/tesseract)
 
 ### 2. Python Dependencies
+Install all required packages:
 
 ```bash
 pip install -r requirements.txt
 ```
 
 ### 3. Configuration
+Edit `config/constants.py` to set:
+- OpenAI API key and model
+- Default YAML template path
+- Required keywords for parsing schemas
 
-The application configuration is managed through `config/constants.py`, including:
-- OpenAI API settings (API key, model, temperature)
-- File paths and templates
-- Schema keywords and required fields
+---
 
 ## Usage
 
-Basic usage:
+### 🔁 Command-Line Interface (`main.py`)
+To convert a PDF using the command line:
+
 ```bash
 python main.py input.pdf
 ```
 
-With verbose output:
+With optional flags:
+
 ```bash
-python main.py input.pdf --verbose
+python main.py input.pdf --ground-truth ground_truth/input.yaml --verbose
 ```
 
-Using a custom template:
+This generates a YAML file in the `output/` folder and, if ground truth is provided, a metrics report in `.txt` format.
+
+---
+
+### 🚀 FastAPI Web Service (`leniency_app.py`)
+To launch the FastAPI server:
+
 ```bash
-python main.py input.pdf --template path/to/template.yaml
+uvicorn leniency_app:app --reload
 ```
 
-## Project Structure
+Then open [http://localhost:8000/docs](http://localhost:8000/docs) for the interactive Swagger UI.
 
+**Available endpoints:**
+- `POST /convert/`: Convert a PDF
+- `POST /convert-with-metrics/`: Convert and evaluate against a ground truth YAML
+
+---
+
+### 📡 API Access via `curl` or Postman
+
+**Convert only:**
+```bash
+curl -X POST http://localhost:8000/convert/ \
+  -F "pdf=@pdf_files/Iris.pdf"
 ```
-.
-├── config/
-│   ├── constants.py         # Configuration constants and API keys
-│   ├── prompts/            # OpenAI prompt templates
-│   └── templates/          # YAML validation templates
-├── pdf_extractor/          # PDF text extraction module
-├── openai_integration/     # OpenAI API integration
-├── yaml_generator/         # YAML generation and validation
-├── output/                 # Generated YAML files
-└── test_files/            # Test PDF files
+
+**Convert with ground truth:**
+```bash
+curl -X POST http://localhost:8000/convert-with-metrics/ \
+  -F "pdf=@pdf_files/Iris.pdf" \
+  -F "ground_truth=@ground_truth/Iris.yaml"
 ```
+
+In **Postman**, set method to `POST`, use `form-data`, and upload files using keys:
+- `pdf`
+- `ground_truth` *(optional)*
+
+---
 
 ## Output
 
-The application generates YAML files in the `output` directory with the naming format:
+The application generates YAML files in the `output/` directory using the format:
+
 ```
 dataset_descriptions_from_{input_pdf_name}.yaml
 ```
 
-Example output structure:
+If metrics are enabled, a matching `.txt` file is created:
+
+```
+dataset_descriptions_from_{input_pdf_name}.txt
+```
+
+### Example YAML Structure
 ```yaml
 DatasetName:
   - role: system
@@ -87,27 +124,31 @@ DatasetName:
       "Column2": type, detailed description
 
       You can access the entire dataset via the "data" variable.
-
-      Additional notes and handling instructions...
 ```
+
+---
 
 ## Error Handling
 
-Common errors and solutions:
-- "Tesseract not found": Ensure Tesseract OCR is installed and in your PATH
-- "OpenAI API error": Check the API key in `config/constants.py`
-- "Invalid PDF file": Verify the input file is a valid PDF
-- "YAML generation failed": Check the input PDF format and content
+Common issues:
+- **"Tesseract not found"**: Ensure OCR is installed and in PATH
+- **"OpenAI API error"**: Check your API key in `config/constants.py`
+- **"Invalid PDF file"**: Ensure file is valid and readable
+- **"YAML generation failed"**: Check if the extracted content matches template expectations
+
+---
 
 ## Contributing
 
 1. Fork the repository
 2. Create a feature branch
 3. Commit your changes
-4. Push to the branch
+4. Push to your branch
 5. Create a Pull Request
+
+---
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License — see the `LICENSE` file for details.
 
