@@ -5,18 +5,49 @@ import shutil
 import uuid
 import subprocess
 import yaml
-import random
+from openai import OpenAI
+from config.constants import OPENAI_API_KEY_ENV
 
 app = FastAPI()
+client = OpenAI(api_key=OPENAI_API_KEY_ENV)
+
+
+def get_confidence(feature_text: str, model: str = "gpt-4", temperature: float = 0.2) -> float:
+    prompt = f"""
+You are evaluating the clarity and correctness of dataset feature definitions.
+For the following line, rate your confidence (from 0.00 to 100.00) that the column name, type, and description are all correct and complete.
+
+Only respond with a number like 97.25 or 83.00. No explanation.
+
+Line:
+{feature_text}
+"""
+    try:
+        response = client.chat.completions.create(
+            model=model,
+            messages=[{"role": "user", "content": prompt.strip()}],
+            temperature=temperature,
+            max_tokens=6
+        )
+        score_text = response.choices[0].message.content.strip()
+        score = float(score_text)
+        return round(max(0.0, min(score, 100.0)), 2)
+    except Exception as e:
+        print(f"[LLM Confidence Scoring Error] {e}")
+        return 0.0
+
 
 def extract_structured_output(yaml_path: Path):
     if not yaml_path.exists():
-        return []
+        return [], 0.0
 
     with open(yaml_path, 'r') as f:
         data = yaml.safe_load(f)
 
     tables = []
+    total_score = 0.0
+    field_count = 0
+
     for dataset, messages in data.items():
         for msg in messages:
             if msg["role"] == "system":
@@ -29,11 +60,14 @@ def extract_structured_output(yaml_path: Path):
                             type_part, *desc_part = rest.split(",", 1)
                             type_ = type_part.strip()
                             description = desc_part[0].strip() if desc_part else ""
+                            confidence_score = get_confidence(line.strip())
+                            total_score += confidence_score
+                            field_count += 1
                             fields.append({
                                 "name": name,
                                 "type": type_,
                                 "description": description,
-                                "confidence_score": round(random.uniform(0.82, 0.98), 2)
+                                "confidence_score": confidence_score
                             })
                         except Exception:
                             continue
@@ -41,19 +75,20 @@ def extract_structured_output(yaml_path: Path):
                     "name": dataset,
                     "fields": fields
                 })
-    return tables
+
+    overall_confidence = round(total_score / field_count, 2) if field_count else 0.0
+    return tables, overall_confidence
+
 
 @app.post("/convert/")
 async def run_main_basic(pdf: UploadFile = File(...)):
     try:
-        # Save uploaded PDF
         temp_dir = Path("temp_files")
         temp_dir.mkdir(exist_ok=True)
         pdf_path = temp_dir / f"{uuid.uuid4()}_{pdf.filename}"
         with open(pdf_path, "wb") as f:
             shutil.copyfileobj(pdf.file, f)
 
-        # Run the main.py script
         result = subprocess.run(
             ["python3", "main.py", str(pdf_path)],
             capture_output=True,
@@ -62,10 +97,11 @@ async def run_main_basic(pdf: UploadFile = File(...)):
 
         output_dir = Path("output")
         yaml_output = output_dir / f"dataset_descriptions_from_{pdf_path.stem}.yaml"
-        tables = extract_structured_output(yaml_output)
+        tables, overall_confidence = extract_structured_output(yaml_output)
 
         return JSONResponse(content={
             "tables": tables,
+            "overall_confidence": overall_confidence,
             "yaml_download_path": str(yaml_output),
             "stdout": result.stdout,
             "stderr": result.stderr,
@@ -82,7 +118,6 @@ async def run_main_with_metrics(
     ground_truth: UploadFile = File(...)
 ):
     try:
-        # Save uploaded files
         temp_dir = Path("temp_files")
         temp_dir.mkdir(exist_ok=True)
 
@@ -94,7 +129,6 @@ async def run_main_with_metrics(
         with open(gt_path, "wb") as f:
             shutil.copyfileobj(ground_truth.file, f)
 
-        # Run the main.py script with ground truth
         result = subprocess.run(
             ["python3", "main.py", str(pdf_path), "--ground-truth", str(gt_path)],
             capture_output=True,
@@ -103,10 +137,11 @@ async def run_main_with_metrics(
 
         output_dir = Path("output")
         yaml_output = output_dir / f"dataset_descriptions_from_{pdf_path.stem}.yaml"
-        tables = extract_structured_output(yaml_output)
+        tables, overall_confidence = extract_structured_output(yaml_output)
 
         return JSONResponse(content={
             "tables": tables,
+            "overall_confidence": overall_confidence,
             "yaml_download_path": str(yaml_output),
             "stdout": result.stdout,
             "stderr": result.stderr,
