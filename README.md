@@ -96,6 +96,7 @@ In **Postman**, set method to `POST`, use `form-data`, and upload files using ke
 - `pdf`
 - `ground_truth` *(optional)*
 
+### note: the confidence score here is for placeholder features.
 ---
 
 ## Output
