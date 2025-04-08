@@ -1,5 +1,4 @@
 from pathlib import Path
-import logging
 from typing import Dict, Tuple, Any
 import copy
 import re
@@ -11,16 +10,60 @@ from openai_integration.client import OpenAIClient, OpenAIClientError
 from output_generator.yaml_generator import YAMLGenerator, YAMLGeneratorError
 
 
-def evaluate_yaml_confidence(yaml_path: str, openai_client: OpenAIClient) -> float:
+def get_confidence(feature_text: str, openai_client: OpenAIClient, model: str = "gpt-4",
+                   temperature: float = 0.0) -> int:
     """
-    Evaluate the quality of the YAML output using a secondary LLM prompt.
-    If the LLM evaluation fails, fall back to a simple schema validation.
+    Evaluate a single feature definition's clarity and correctness using a secondary LLM prompt.
 
-    The secondary prompt asks the LLM to return a single numerical score (0-1)
-    that represents the quality of the YAML output with respect to correctness and completeness.
+    The LLM is prompted to return a number (0–100) representing the confidence that the feature definition
+    (column name, type, and description) is correct and complete.
+
+    Args:
+        feature_text: The feature definition line.
+        openai_client: An instance of OpenAIClient.
+        model: The model to use (default "gpt-4").
+        temperature: Temperature setting (default 0.0).
 
     Returns:
-        A confidence score between 0 and 1.
+        An integer score between 0 and 100. On error, returns 0.
+    """
+    prompt = f"""
+You are evaluating the clarity and correctness of dataset feature definitions.
+For the following line, rate your confidence (from 0 to 100) that the column name, type, and description are all correct and complete.
+
+Only respond with a number from 0 to 100. No explanation.
+
+Line:
+{feature_text}
+"""
+    try:
+        response = openai_client.client.chat.completions.create(
+            model=model,
+            messages=[{"role": "user", "content": prompt.strip()}],
+            temperature=temperature,
+            max_tokens=5
+        )
+        score_text = response.choices[0].message.content.strip()
+        score = int(score_text)
+        return max(0, min(score, 100))
+    except Exception as e:
+        # Log warning only
+        print(f"[LLM Confidence Scoring Warning] {e}")
+        return 0
+
+
+def evaluate_yaml_with_llm(yaml_path: str, openai_client: OpenAIClient) -> float:
+    """
+    Evaluate the YAML output quality by computing per-feature confidence scores and averaging them.
+
+    Process:
+      1. Read and parse the YAML file.
+      2. Extract the system entry (role: "system") from the top-level dataset.
+      3. For each line matching a feature definition (using regex), call get_confidence.
+      4. Average the scores and normalize to a 0–1 scale.
+
+    Returns:
+        A composite confidence score (float between 0 and 1). Defaults to 0.0 on failure.
     """
     try:
         with open(yaml_path, "r", encoding="utf-8") as f:
@@ -28,35 +71,44 @@ def evaluate_yaml_confidence(yaml_path: str, openai_client: OpenAIClient) -> flo
     except Exception:
         return 0.0
 
-    prompt = (
-        "Evaluate the following YAML content for correctness and completeness in describing a dataset schema. "
-        "Respond with only a single numerical value between 0 and 1, where 1 indicates perfect quality and 0 indicates unacceptable quality.\n\n"
-        f"YAML Content:\n{yaml_content}"
-    )
     try:
-        response = openai_client.evaluate_prompt(prompt)
-        score = float(response.strip())
-        return max(0.0, min(1.0, score))
+        parsed = yaml.safe_load(yaml_content)
     except Exception:
-        # Fallback: simplified validation for your YAML prompt format.
-        try:
-            parsed = yaml.safe_load(yaml_content)
-            # Expect a single top-level key (the dataset name) with a list of entries.
-            if isinstance(parsed, dict) and len(parsed) == 1:
-                top_key = next(iter(parsed))
-                entries = parsed[top_key]
-                if isinstance(entries, list) and any(entry.get("role") == "system" and "content" in entry for entry in entries):
-                    return 1.0
-                else:
-                    return 0.0
-            else:
-                return 0.0
-        except Exception:
-            return 0.0
+        return 0.0
+
+    if not isinstance(parsed, dict) or not parsed:
+        return 0.0
+
+    dataset_name = next(iter(parsed.keys()))
+    system_entries = parsed.get(dataset_name)
+    if not isinstance(system_entries, list) or not system_entries:
+        return 0.0
+
+    system_content = None
+    for entry in system_entries:
+        if entry.get("role") == "system" and "content" in entry:
+            system_content = entry["content"]
+            break
+    if system_content is None:
+        return 0.0
+
+    pattern = r'^\s*"([^"]+)"\s*:\s*([^,]+),(.*)$'
+    scores = []
+    for line in system_content.splitlines():
+        m = re.match(pattern, line)
+        if m:
+            feature_line = f'"{m.group(1).strip()}": {m.group(2).strip()}, {m.group(3).strip()}'
+            score = get_confidence(feature_line, openai_client)
+            scores.append(score)
+    if scores:
+        avg_score = sum(scores) / len(scores)
+        return avg_score / 100.0
+    return 0.0
+
 
 def transform_yaml_to_json(yaml_path: str, confidence: float, yaml_download_url: str) -> Dict[str, Any]:
     """
-    Transform the generated YAML content into a JSON object with the required structure.
+    Transform the generated YAML content into a pure JSON object following the required structure.
 
     Expected JSON format:
       {
@@ -74,15 +126,19 @@ def transform_yaml_to_json(yaml_path: str, confidence: float, yaml_download_url:
             ]
           }
         ],
-        "yaml_download_url": "{yaml_download_url}"
+        "yaml_download_path": "{yaml_download_url}",
+        "overall_confidence": {overall_confidence},
+        "stdout": "",
+        "stderr": "",
+        "return_code": 0
       }
 
     This function:
       1. Reads the YAML file.
-      2. Assumes the YAML has a single top-level key representing the dataset name.
+      2. Assumes a single top-level key representing the dataset name.
       3. Finds the first system entry with a "content" key.
-      4. Uses a regex to extract column definitions from the system content.
-      5. Builds the JSON object and assigns the provided confidence score to each field.
+      4. Uses a regex to extract feature definitions.
+      5. Constructs and returns the pure JSON object.
     """
     with open(yaml_path, "r", encoding="utf-8") as f:
         yaml_content = f.read().strip()
@@ -103,70 +159,93 @@ def transform_yaml_to_json(yaml_path: str, confidence: float, yaml_download_url:
     if system_content is None:
         raise ValueError("Could not find a system entry with content in the YAML.")
 
-    # Use regex to extract lines that start with a quoted column name.
     pattern = r'^\s*"([^"]+)"\s*:\s*([^,]+),(.*)$'
     fields = []
     for line in system_content.splitlines():
         m = re.match(pattern, line)
         if m:
-            col_name = m.group(1).strip()
-            col_type = m.group(2).strip()
-            col_desc = m.group(3).strip()
             fields.append({
-                "name": col_name,
-                "type": col_type,
-                "description": col_desc,
-                "confidence_score": confidence
+                "name": m.group(1).strip(),
+                "type": m.group(2).strip(),
+                "description": m.group(3).strip(),
+                "confidence_score": round(confidence * 100, 2)
             })
-    return {
+    json_obj = {
         "tables": [
             {
                 "name": dataset_name,
                 "fields": fields
             }
         ],
-        "yaml_download_url": yaml_download_url
+        "yaml_download_path": yaml_download_url,
+        "overall_confidence": round(confidence * 100, 2),
+        "stdout": "",
+        "stderr": "",
+        "return_code": 0
     }
+    return json_obj
 
 
 class PDFConverter:
     def __init__(self, template_path: str, verbose: bool = False):
         """
-        Initialize the PDF converter with a template path.
-        
+        Initialize the PDF converter with a YAML template path.
+
         Args:
-            template_path: Path to the YAML template file
-            verbose: Enable verbose logging
+            template_path: Path to the YAML template file.
+            verbose: Enable verbose logging.
         """
-        self.logger = self._setup_logging(verbose)
         self.template_path = Path(template_path).resolve()
         self._validate_template()
 
-    def _setup_logging(self, verbose: bool) -> logging.Logger:
-        """Set up logging configuration."""
-        level = logging.DEBUG if verbose else logging.INFO
-        logging.basicConfig(level=level, format='%(message)s')
-        return logging.getLogger(__name__)
-
     def _validate_template(self):
-        """Validate that the template file exists."""
+        """Ensure that the YAML template file exists."""
         if not self.template_path.exists():
             raise FileNotFoundError(f"Template file not found: {self.template_path}")
-        self.logger.debug(f"Template file found: {self.template_path}")
 
     def convert_pdf(self, pdf_path: str) -> Tuple[str, Dict]:
         """
-        Convert a PDF file to YAML and return the download URL and JSON response.
+        Convert a PDF file to YAML and return the YAML download path and pure JSON response.
+
+        Process:
+          1. Extract text from the PDF using PDFTextExtractor.
+          2. Process the extracted text using OpenAIClient.
+          3. Generate YAML output using YAMLGenerator (without confidence scores).
+          4. Evaluate the YAML output to compute a composite confidence score.
+          5. Transform the YAML output into a pure JSON object.
+          6. Return the YAML download path and the JSON response.
+
+        Expected JSON format:
+          {
+            "tables": [
+              {
+                "name": "{dataset_name}",
+                "fields": [
+                  {
+                    "name": "{column_name}",
+                    "type": "{column_type}",
+                    "description": "{column_description}",
+                    "confidence_score": {confidence_score}
+                  },
+                  ...
+                ]
+              }
+            ],
+            "yaml_download_path": "{path_to_yaml_file}",
+            "overall_confidence": {overall_confidence},
+            "stdout": "",
+            "stderr": "",
+            "return_code": 0
+          }
 
         Args:
-            pdf_path: Path to the input PDF file
+            pdf_path: Path to the input PDF file.
 
         Returns:
-            Tuple containing:
-            - YAML file download URL
-            - JSON response following the API specification
+            A tuple containing:
+              - YAML output path (string)
+              - JSON response (dict)
         """
-        self.logger.info(f"Starting conversion for PDF: {pdf_path}")
         pdf_path_obj = Path(pdf_path).resolve()
         if not pdf_path_obj.exists():
             raise FileNotFoundError(f"Input PDF file not found: {pdf_path_obj}")
@@ -188,14 +267,10 @@ class PDFConverter:
                 field.pop("confidence_score", None)
         generator = YAMLGenerator(self.template_path)
         output_path = generator.save(content_for_yaml, pdf_path_obj)
-        self.logger.info(f"YAML output written to: {output_path}")
 
         # Step 4: Evaluate the YAML output quality.
-        confidence_score = evaluate_yaml_confidence(str(output_path), ai_client)
-        self.logger.info(f"Evaluated YAML output confidence: {confidence_score:.2f}")
+        confidence_score = evaluate_yaml_with_llm(str(output_path), ai_client)
 
-        # Step 5: Transform the YAML output into the JSON response.
+        # Step 5: Transform the YAML output into the pure JSON response.
         json_response = transform_yaml_to_json(str(output_path), confidence_score, str(output_path))
-
-        self.logger.info("PDF conversion completed successfully.")
         return str(output_path), json_response
