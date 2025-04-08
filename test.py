@@ -6,6 +6,7 @@ def test_pdf_converter():
     sample_pdf = "pdf_files/Adult.pdf"
     template_path = "config/templates/default.yaml"
 
+
     assert Path(sample_pdf).exists(), "Sample PDF not found."
     assert Path(template_path).exists(), "Template file not found."
 
