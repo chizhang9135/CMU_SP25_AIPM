@@ -1,8 +1,3 @@
-Here's your complete and refined `README.md`:
-
----
-
-```markdown
 # PDF to YAML Schema Converter
 
 A command-line and API-based application that processes PDF files containing database schema descriptions and generates structured YAML output. The application uses OpenAI's language models to structure and clarify schema content, making it easier to integrate with other data workflows and validation pipelines.
@@ -105,12 +100,14 @@ Visit [http://localhost:8000/docs](http://localhost:8000/docs) for the Swagger U
 
 **Endpoints:**
 
-- `POST /convert/` – Convert PDF to YAML
-- `POST /convert-with-metrics/` – Convert and evaluate with ground truth and generate a report under output (not intent for display, for debug only)
+- `POST /convert/` – Convert PDF to YAML and return structured JSON
+- `POST /convert-with-metrics/` – Convert and evaluate with ground truth (returns metrics report in `.txt`, not JSON)
 
 #### 🧪 Experimental API (`experiment_app.py`)
 
 An attempt to refactor the codebase for better modularity and maintainability. Uses internal `PDFConverter` logic and returns structured JSON responses.
+
+> **Note:** This API does not support ground truth or metrics evaluation. It is lightweight and focused on generation only.
 
 Start the server:
 
@@ -159,20 +156,36 @@ If evaluated:
 dataset_descriptions_from_{input_pdf_name}.txt
 ```
 
-### YAML Example
+### 📊 JSON Response (both APIs)
 
-```yaml
-DatasetName:
-  - role: system
-    content: |
-      [Dataset Description]:
-      Description of the dataset...
+Both `/convert/` endpoints return:
 
-      "Column1": type, detailed description
-      "Column2": type, detailed description
-
-      You can access the entire dataset via the "data" variable.
+```json
+{
+  "tables": [
+    {
+      "name": "DatasetName",
+      "fields": [
+        {
+          "name": "Column1",
+          "type": "string",
+          "description": "Some description here",
+          "confidence_score": 94.23
+        },
+        ...
+      ]
+    }
+  ],
+  "overall_confidence": 92.11,
+  "yaml_download_path": "output/dataset_descriptions_from_input.pdf.yaml",
+  "stdout": "...",
+  "stderr": "...",
+  "return_code": 0
+}
 ```
+
+- `confidence_score`: Estimated by GPT for each column definition
+- `overall_confidence`: Average of all feature confidence scores
 
 ---
 
@@ -200,4 +213,3 @@ DatasetName:
 ## License
 
 This project is licensed under the MIT License. See the `LICENSE` file for details.
-```
