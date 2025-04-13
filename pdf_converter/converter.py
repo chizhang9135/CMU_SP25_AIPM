@@ -194,7 +194,7 @@ def transform_yaml_to_json(yaml_path: str, overall_confidence: float, features: 
     }
     return json_obj
 
-
+# Deprecated: This class is deprecated and will be removed in a future version.
 class PDFConverter:
     def __init__(self, template_path: str, verbose: bool = False):
         """

@@ -5,11 +5,12 @@ import os
 from typing import Dict, List, Optional, Tuple
 import yaml
 from pathlib import Path
+from openai import OpenAI
 
 from config.constants import (
-    OPENAI_API_KEY_ENV,
     OPENAI_MODEL,
     OPENAI_TEMPERATURE,
+    OPENAI_API_KEY,
     DEFAULT_PROMPT_TEMPLATE,
     DEFAULT_SCHEMA_VALIDATOR_PROMPT_TEMPLATE,
 )
@@ -31,12 +32,16 @@ class OpenAIClient:
     
     def __init__(self):
         """Initialize the OpenAI client with API key and prompt template."""
+
+        # Set API key in environment
+        os.environ["OPENAI_API_KEY"] = OPENAI_API_KEY
+
         # Load prompt template
         self.prompt_template, self.schema_validator_prompt_template = self._load_prompt_template()
 
         # Initialize OpenAI client
-        import openai
-        self.client = openai.OpenAI(api_key=os.getenv(OPENAI_API_KEY_ENV))
+
+        self.client = OpenAI()
 
     def _load_prompt_template(self) -> str:
         """

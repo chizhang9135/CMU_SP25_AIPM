@@ -5,44 +5,30 @@ A command-line application that processes PDF files containing database schema d
 
 ## Architecture
 
-### Framework Selection: LangChain vs LangGraph Trade-offs
+### Framework Selection: LangGraph Implementation
 
-We evaluated both LangChain and LangGraph for this application:
+We've implemented a graph-based workflow using LangGraph that provides:
 
-#### LangChain Characteristics
-- Traditional sequential chain-based workflows
-- Simple implementation for linear processes
-- Built-in document loading and processing tools
-- Basic memory management through Memory classes
-- Mature but less flexible for complex state handling
+- **State Management**: Explicit state tracking throughout the conversion process
+- **Validation Loops**: Multiple passes for refinement and error correction
+- **Error Recovery**: Graceful handling of extraction and parsing failures
+- **Confidence Scoring**: Built-in evaluation of output quality
 
 #### LangGraph Benefits
 - Graph-based state machine architecture
-- Superior error recovery and retry mechanisms
 - Explicit state management for complex workflows
-- Better handling of edge cases and validation loops
-- Visual workflow debugging capabilities
-- Native support for parallel processing
-- More granular control over the conversion pipeline
-
-#### Decision
-For this application, we chose LangGraph because:
-1. Schema conversion often requires multiple validation and refinement cycles
-2. Error handling needs sophisticated recovery paths (e.g., OCR failures, schema ambiguities)
-3. The graph-based architecture allows for:
-   - Parallel processing of multiple schema sections
-   - Dynamic branching based on content complexity
-   - Explicit state tracking for partial successes
-4. Visual debugging helps optimize the conversion pipeline
-5. Future extensibility for more complex workflows
+- Confidence-based output evaluation
+- Automatic retries with feedback incorporation
+- Asynchronous execution for better performance
+- JSON output for easy integration with other systems
 
 ### High-Level Flow
 ```
-                        ┌─── Validation Loop ───┐
-                        │                       │
-Input PDF → Text Extraction → Schema Analysis → YAML Generation → Output
-                        │                       │
-                        └─── Error Recovery ────┘
+                        ┌─── Validation & Refinement Loop ───┐
+                        │                                    │
+Input PDF → Text Extraction → YAML Generation → Validation →  Output Generation
+                        │                                    │
+                        └─── Feedback Incorporation ───────-─┘
 ```
 
 ### Components
@@ -50,51 +36,68 @@ Input PDF → Text Extraction → Schema Analysis → YAML Generation → Output
 1. **PDF Text Extractor** (`pdf_extractor/`)
    - Handles PDF file reading and text extraction
    - Uses PyMuPDF for PDF parsing
-   - Implements OCR capabilities using Tesseract for scanned documents
    - Provides clean, normalized text output
-   - Includes robust error handling for OCR and PDF processing
+   - Includes robust error handling
 
-2. **LangGraph Integration** (`langgraph_integration/`)
-   - Implements state machine for document processing
-   - Defines nodes for schema identification and transformation
-   - Manages parallel processing of document sections
-   - Handles state transitions and error recovery
-   - Implements validation and refinement cycles
-   - Provides visual workflow monitoring
-   - Includes comprehensive retry strategies
+2. **LangGraph Workflow** (`langgraph_agents/`)
+   - Implements state machine for document processing using `StateGraph`
+   - Defines nodes for extraction, generation, validation, and output
+   - Manages state transitions with conditional routing
+   - Implements confidence-based termination criteria
+   - Provides comprehensive error handling with stack traces
+   - Supports asynchronous execution of all operations
 
-3. **YAML Generator** (`yaml_generator/`)
+3. **OpenAI Integration** (`openai_integration/`)
+   - Implements asynchronous API calls to OpenAI models
+   - Manages prompt templates for generation and validation
+   - Handles YAML parsing of model responses
+   - Implements error handling for API calls
+
+4. **YAML Generator** (`output_generator/`)
    - Generates standardized YAML output
    - Implements templating for consistent formatting
-   - Validates output structure
-   - Saves files to `/output` directory with standardized naming
-   - Includes comprehensive error handling for file operations
+   - Transforms YAML to JSON for API compatibility
+   - Saves files with standardized naming
+   - Includes confidence scores in output
 
-4. **Configuration** (`config/`)
+5. **Configuration** (`config/`)
    - Centralizes all configuration settings
    - Manages environment variables and constants
    - Stores template files and system prompts
-   - Provides easy customization of application behavior
 
 ### Implementation Details
 
-#### Configuration
-- Templates stored in `config/templates/`
-- Environment variables for API keys and settings
-- Configurable OpenAI parameters (model, temperature, etc.)
-- Constants defined in `config/constants.py`
+#### Workflow State
+The workflow maintains a comprehensive state object (`PDFState`) containing:
+- PDF path and extracted text
+- Current YAML representation
+- Iteration count for refinement loops
+- Confidence score for output quality
+- Validation feedback for improvements
+- Error information with full stack traces
+- Output file paths and JSON representation
+
+#### Confidence-Based Validation
+- Each generated YAML is evaluated for quality
+- Confidence scores determine whether to continue refinement
+- Configurable threshold for acceptable output quality
+- Maximum iteration limit to prevent infinite loops
+
+#### Async Execution
+- All components implement asynchronous interfaces
+- OpenAI API calls are non-blocking
+- Full async support from extraction to output generation
 
 #### Error Handling
 - Custom exception classes for each component
-- Detailed logging with debug mode
+- Detailed stack traces for debugging
 - Graceful failure handling with informative messages
-- Proper cleanup of temporary files and resources
 
 #### Output Format
 - Standardized YAML structure
-- Files saved as `dataset_descriptions_from_{pdf_name}.yaml`
-- All outputs stored in `/output` directory
-- Consistent formatting and structure
+- JSON representation for API compatibility
+- Includes confidence scores and metadata
+- Consistent table and field structure
 
 ## Command-Line Interface
 
@@ -107,19 +110,39 @@ python main.py <input_pdf> [--template TEMPLATE] [--verbose]
 - `--template`: Optional path to custom YAML template (default: config/templates/default.yaml)
 - `--verbose`: Enable detailed logging output
 
+## API Usage
+The workflow can be used programmatically:
+
+```python
+import asyncio
+from langgraph_agents.workflow import PDFToYAMLWorkflow
+
+async def process_pdf(pdf_path):
+    workflow = PDFToYAMLWorkflow(template_path="config/templates/default.yaml")
+    state = await workflow.run(pdf_path)
+    
+    # Access results
+    yaml_path = state["output_path"]
+    json_response = state["json_obj"]
+    confidence = state["confidence_score"]
+    
+    return yaml_path, json_response
+
+# Run the workflow
+yaml_path, json_response = asyncio.run(process_pdf("example.pdf"))
+```
+
 ## Dependencies
 - PyMuPDF (>=1.25.0): PDF parsing
-- Pillow (>=11.0.0): Image processing
-- pytesseract (>=0.3.13): OCR capabilities
+- LangGraph (>=0.0.30): Workflow orchestration
 - OpenAI (>=1.68.0): API integration
 - PyYAML (>=6.0.0): YAML processing
 - python-dotenv (>=1.0.0): Environment management
 
 ## Installation
 1. Install Python 3.13+
-2. Install Tesseract OCR
-3. Install Python dependencies: `pip install -r requirements.txt`
-4. Set up environment variables in `.env` file:
+2. Install Python dependencies: `pip install -r requirements.txt`
+3. Set up environment variables in `.env` file:
    ```
    OPENAI_API_KEY=your_api_key_here
    ```
@@ -131,13 +154,19 @@ python main.py example.pdf --verbose
 
 This will:
 1. Extract text from example.pdf
-2. Process the content using OpenAI
-3. Generate a YAML file in the /output directory
-4. Name the output file as dataset_descriptions_from_example.yaml
+2. Process the content using the LangGraph workflow
+3. Generate a YAML file with dataset descriptions
+4. Include a JSON representation with confidence scores
 
-## Error Messages
-Common error messages and their solutions:
-- "Tesseract not found": Install Tesseract OCR and ensure it's in your PATH
-- "OpenAI API key not found": Check your .env file configuration
-- "Invalid PDF file": Ensure the input file is a valid PDF
-- "YAML generation failed": Check the input PDF format and content 
+## Testing
+Run the test suite to validate the workflow:
+
+```bash
+python test.py
+```
+
+The tests verify:
+- PDF text extraction
+- YAML generation
+- JSON conversion
+- End-to-end workflow 

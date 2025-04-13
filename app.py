@@ -6,13 +6,12 @@ import uuid
 import subprocess
 import yaml
 from openai import OpenAI
-from config.constants import OPENAI_API_KEY_ENV
+from config.constants import OPENAI_API_KEY
 
 app = FastAPI()
-client = OpenAI()
+client = OpenAI(api_key=OPENAI_API_KEY)
 
-
-def get_confidence(feature_text: str, model: str = "gpt-4", temperature: float = 0.2) -> float:
+def get_confidence(feature_text: str, model: str = "gpt-4o-mini", temperature: float = 0.2) -> float:
     prompt = f"""
 You are evaluating the clarity and confidence of dataset feature definitions.
 For the following line, rate your confidence (from 0 to 100) that the column name, type, and description are all correct and complete. Only respond with a number like 97.25 or 83.00. No explanation.

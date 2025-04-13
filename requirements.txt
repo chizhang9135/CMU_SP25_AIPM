@@ -6,3 +6,4 @@ PyYAML>=6.0.0
 fastapi
 uvicorn
 python-multipart
+langgraph

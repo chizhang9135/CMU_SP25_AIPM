@@ -3,9 +3,10 @@ from fastapi.responses import JSONResponse
 from pathlib import Path
 import shutil
 import uuid
+import asyncio
 
-from pdf_converter.converter import PDFConverter
 from config.constants import DEFAULT_YAML_TEMPLATE
+from langgraph_agents.workflow import PDFToYAMLWorkflow
 
 app = FastAPI()
 
@@ -18,8 +19,10 @@ async def convert_pdf(pdf: UploadFile = File(..., media_type="application/pdf"))
         with open(pdf_path, "wb") as f:
             shutil.copyfileobj(pdf.file, f)
 
-        converter = PDFConverter(template_path=DEFAULT_YAML_TEMPLATE, verbose=True)
-        yaml_path, json_response = converter.convert_pdf(str(pdf_path))
+        workflow = PDFToYAMLWorkflow(template_path=DEFAULT_YAML_TEMPLATE)
+        state = await workflow.run(str(pdf_path))
+        yaml_path = state["output_path"]
+        json_response = state["json_obj"]
 
         return JSONResponse(content={
             "yaml_download_path": str(yaml_path),
