@@ -31,15 +31,12 @@ class OpenAIClient:
     
     def __init__(self):
         """Initialize the OpenAI client with API key and prompt template."""
-        # Set up OpenAI API key
-        os.environ["OPENAI_API_KEY"] = OPENAI_API_KEY_ENV
-        
         # Load prompt template
         self.prompt_template, self.schema_validator_prompt_template = self._load_prompt_template()
-        
+
         # Initialize OpenAI client
         import openai
-        self.client = openai.OpenAI()
+        self.client = openai.OpenAI(api_key=os.getenv(OPENAI_API_KEY_ENV))
 
     def _load_prompt_template(self) -> str:
         """

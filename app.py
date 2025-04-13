@@ -9,7 +9,7 @@ from openai import OpenAI
 from config.constants import OPENAI_API_KEY_ENV
 
 app = FastAPI()
-client = OpenAI(api_key=OPENAI_API_KEY_ENV)
+client = OpenAI()
 
 
 def get_confidence(feature_text: str, model: str = "gpt-4", temperature: float = 0.2) -> float:

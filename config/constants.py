@@ -1,9 +1,10 @@
 """
 Constants used throughout the application.
 """
-
+import os
 # OpenAI Configuration
 OPENAI_API_KEY_ENV = "OPENAI_API_KEY"
+OPENAI_API_KEY = os.getenv(OPENAI_API_KEY_ENV)
 OPENAI_MODEL = "gpt-4o-mini"
 # Temperature controls randomness in the model's responses:
 # - 0.0: Focused, deterministic responses (good for structured data)
