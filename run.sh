@@ -1,6 +1,7 @@
 #!/bin/bash
 
-echo "🔐 Enter your OpenAI API key:"
+echo "🔐 Enter your OpenAI API key below."
+echo "(Paste or type your key — input will be hidden for security):"
 read -s OPENAI_KEY
 
 # Safely write it to the .env file with single quotes
