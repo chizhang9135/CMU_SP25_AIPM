@@ -2,6 +2,8 @@
 Constants used throughout the application.
 """
 import os
+from dotenv import load_dotenv
+load_dotenv()
 
 # OpenAI API configuration
 OPENAI_API_KEY_ENV_NAME = "OPENAI_API_KEY"
