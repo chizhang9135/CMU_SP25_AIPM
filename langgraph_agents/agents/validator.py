@@ -50,5 +50,5 @@ class SchemaValidator:
         Returns:
             Tuple of (is_valid, confidence_score, feedback)
         """
-        # Always return valid with high confidence
+        # TODO Always return valid with high confidence
         return True, 1.0, None
