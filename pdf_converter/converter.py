@@ -245,7 +245,7 @@ class PDFConverter:
 
         # Step 2: Process text with OpenAIClient.
         ai_client = OpenAIClient()
-        processed_content = ai_client.process_pdf_text(raw_text)
+        processed_content = ai_client.gpt_inference(raw_text)
 
         # Step 3: Generate YAML output (remove any pre-existing confidence scores).
         content_for_yaml = copy.deepcopy(processed_content)
