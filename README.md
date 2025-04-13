@@ -18,7 +18,55 @@ A command-line and API-based application that processes PDF files containing dat
 
 ---
 
-## Installation
+## 🚀 Deploy & Run with Docker
+
+This project supports a one-command deployment using Docker. No need to install Python, Tesseract, or dependencies manually.
+
+### 1. Prerequisites
+
+- [Docker](https://www.docker.com/) installed
+- [Docker Compose](https://docs.docker.com/compose/install/) or use `docker compose` (Docker v20.10+)
+
+> 🛑 **Note:** If your Docker requires elevated privileges, you may need to run the following commands with `sudo`.
+
+### 2. Clone the Repository
+
+```bash
+git clone https://github.com/your-org/CMU_SP25_AIPM.git
+cd CMU_SP25_AIPM
+```
+
+### 3. Run the App
+
+```bash
+./run.sh
+```
+
+You’ll be prompted to enter your **OpenAI API key**. Input is hidden for security:
+
+```
+🔐 Enter your OpenAI API key below.
+(Paste or type your key — input will be hidden for security):
+```
+
+If you see a "permission denied" Docker error, run the script using `sudo`:
+
+```bash
+sudo ./run.sh
+```
+
+### 4. Access the Web API
+
+Once running, open your browser:
+
+- **Local:** [http://localhost:8000/docs](http://localhost:8000/docs)
+- **Remote/public:** `http://<your-ip>:8000/docs`
+
+Use the `/convert/` endpoint to upload PDF files and receive structured YAML output.
+
+---
+
+## Manual Installation
 
 ### 1. Prerequisites
 
