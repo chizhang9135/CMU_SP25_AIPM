@@ -1,10 +1,10 @@
 #!/bin/bash
 
-echo "Welcome to the PDF-to-YAML Schema Converter."
-read -p "Please paste your OpenAI API key: " USER_KEY
+echo "🔐 Enter your OpenAI API key:"
+read -s OPENAI_KEY
 
-# Create .env dynamically
-echo "OPENAI_API_KEY=$USER_KEY" > .env
+# Safely write it to the .env file with single quotes
+echo "OPENAI_API_KEY='$OPENAI_KEY'" > .env
 
-echo "Starting the service..."
-docker-compose up --build
+echo "🚀 Starting the service..."
+docker compose up --build
