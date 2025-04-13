@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  aipm:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: aipm
+    ports:
+      - "8000:8000"
+    environment:
+      - OPENAI_API_KEY
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+    command: ["python", "experiment_app.py"]
