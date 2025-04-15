@@ -1,31 +1,29 @@
-from typing import Dict, Tuple, Optional
+from typing import Dict, Tuple, Optional, List, Set
 from pathlib import Path
 from openai_integration.client import OpenAIClient
 from langgraph_agents.states import PDFState, WorkflowConfig
 import re
 from config.constants import OPENAI_MODEL
+import logging
+
+# Setup logger
+logger = logging.getLogger("Validator")
+logger.setLevel(logging.INFO)
+handler = logging.StreamHandler()
+formatter = logging.Formatter("[%(levelname)s] %(message)s")
+handler.setFormatter(formatter)
+logger.addHandler(handler)
 
 
 class SchemaValidator:
     """Validator agent for checking YAML schema and suggesting corrections"""
 
+    field_scores_cache = {}
+
     def __init__(self, config: WorkflowConfig):
         self.config = config
         self.openai_client = OpenAIClient()
         self.field_score_prompt_template = self._load_field_prompt()
-
-
-    def _load_field_prompt(self) -> str:
-        """
-        Loads the field-level scoring prompt template.
-        """
-        prompt_path = Path("config/prompts/field_score_prompt.txt")  # Adjust if your prompt is elsewhere
-        try:
-            with open(prompt_path, 'r', encoding='utf-8') as f:
-                return f.read().strip()
-        except Exception as e:
-            print(f"[SchemaValidator] Failed to load scoring prompt: {e}")
-            return ""
 
     def _load_field_prompt(self) -> str:
         prompt_path = Path("config/prompts/field_score_prompt.txt")
@@ -33,12 +31,16 @@ class SchemaValidator:
             with open(prompt_path, 'r', encoding='utf-8') as f:
                 return f.read().strip()
         except Exception as e:
-            print(f"[SchemaValidator] Failed to load scoring prompt: {e}")
+            logger.error(f"Failed to load scoring prompt: {e}")
             return ""
 
     async def _score_component(self, field_type: str, field_value: str) -> float:
         if not field_value:
             return 0.0
+
+        cache_key = f"{field_type}:{field_value}"
+        if cache_key in self.field_scores_cache:
+            return self.field_scores_cache[cache_key]
 
         prompt = self.field_score_prompt_template.format(
             field_type=field_type,
@@ -50,148 +52,188 @@ class SchemaValidator:
                 model=OPENAI_MODEL,
                 temperature=0,
                 messages=[
-                    {"role": "system", "content": "You are evaluating the clarity and correctness of dataset feature definitions. For the following {field_type}, rate your confidence (from 0 to 100) based on the rubric. Only respond with a float from 0 to 100. Do not explain or justify the score."},
+                    {"role": "system",
+                     "content": "You are evaluating the clarity and correctness of dataset feature definitions. For the following {field_type}, rate your confidence (from 0 to 100) based on the rubric. Only respond with a float from 0 to 100. Do not explain or justify the score."},
                     {"role": "user", "content": prompt}
                 ]
             )
             content = response.choices[0].message.content.strip()
-            print(f"[GPT SCORE RAW] {field_type}: {field_value} → {content}")
-            return float(content)
+            score = float(content)
+
+            self.field_scores_cache[cache_key] = score
+            return score
 
         except Exception as e:
-            print(f"[ERROR] GPT scoring failed for {field_type}: {e}")
+            logger.error(f"Scoring failed for {field_type}: {e}")
             return 0.0
 
-    async def validate_and_suggest(
-        self,
-        state: PDFState
-    ) -> PDFState:
-        """
-        Validates YAML and provides correction suggestions if needed.
-        Updates the state with validation results and feedback.
+    def _label_score(self, score: float) -> str:
+        if score >= 90: return "Accurate & Specific"
+        if score >= 75: return "Semantically Aligned"
+        if score >= 60: return "Vague / Abstract"
+        if score >= 40: return "Inaccurate"
+        return "Missing or irrelevant"
 
-        Args:
-            state: Current workflow state
+    async def validate_and_suggest(self, state: PDFState) -> PDFState:
+        iteration = state.get("iteration_count", 0)
+        logger.info(f"🔍 Starting validation | Iteration {iteration}")
 
-        Returns:
-            Updated state with validation results
-        """
-        print(f"Validating YAML. Iteration count: {state.get('iteration_count', 0)}")
-        if state.get("iteration_count", 0) >= self.config.max_iterations:
+        if iteration >= self.config.max_iterations:
             state["is_final"] = True
             return state
 
-        # Validate the current YAML
-        is_valid, confidence, feedback = await self._check_yaml(state.get("current_yaml"))
+        previous_failed_fields = state.get("failed_fields", [])
+        field_positions = state.get("field_positions", {})
 
-        # Update state
+        is_valid, confidence, feedback, failed_fields, new_field_positions = await self._check_yaml(
+            state.get("current_yaml"), previous_failed_fields, field_positions, iteration
+        )
+
         state["confidence_score"] = confidence
         state["validation_feedback"] = feedback
-        # Default threshold is 0.8 ~ 80% confidence
-        state["is_final"] = is_valid or (confidence >= self.config.confidence_threshold)
+        state["failed_fields"] = failed_fields
+        state["field_positions"] = new_field_positions
+        state["is_final"] = (iteration >= self.config.max_iterations or is_valid)
 
         return state
 
     async def _check_yaml(
         self,
-        yaml_content: Dict
-    ) -> Tuple[bool, float, Optional[str]]:
-        """
-        Checks YAML content validity and generates feedback.
-        Currently configured to always pass for testing.
+        yaml_content: Dict,
+        previous_failed_fields: List[str] = None,
+        previous_field_positions: Dict[str, int] = None,
+        iteration: int = 1
+    ) -> Tuple[bool, float, Optional[str], List[str], Dict[str, int]]:
 
-        Returns:
-            Tuple of (is_valid, confidence_score, feedback)
-        """
-        # TODO do the confidence logic here
-        # ========== STEP 1: Parse YAML structure ==========
+        field_scores = []
+        feedback_lines = []
+        failed_fields = []
+
         if not yaml_content or len(yaml_content) == 0:
-            return False, 0.0, "No YAML content found"
+            return False, 0.0, "No YAML content found", [], {}
 
         dataset_name = next(iter(yaml_content))
         entries = yaml_content[dataset_name]
 
         if not isinstance(entries, list) or len(entries) == 0:
-            return False, 0.0, f"No entries under dataset '{dataset_name}'"
+            return False, 0.0, f"No entries under dataset '{dataset_name}'", [], {}
 
         raw_text = entries[0].get("content", "")
         if not raw_text:
-            return False, 0.0, "No 'content' found in dataset entry"
+            return False, 0.0, "No 'content' found in dataset entry", [], {}
 
-        lines = raw_text.splitlines()
         columns = []
-        for line in lines:
+        field_positions = {}
+
+        for line in raw_text.splitlines():
             match = re.match(r'^"(.*?)":\s*(\w+),\s*(.*)', line.strip())
             if match:
                 name, dtype, desc = match.groups()
+                field_id = name.strip()
                 columns.append({
-                    "name": name.strip(),
+                    "name": field_id,
                     "type": dtype.strip(),
                     "description": desc.strip()
                 })
+                field_positions[field_id] = len(columns) - 1
 
         if not columns:
-            return False, 0.0, "No valid fields found in schema"
+            return False, 0.0, "No valid fields found in schema", [], {}
 
-        print(f"[VALIDATOR DEBUG] Parsed {len(columns)} fields")
+        total_fields = len(columns)
+        is_selective = (iteration > 1 and previous_failed_fields)
 
-        field_scores = []
-        feedback_lines = []
+        fields_to_evaluate = set()
+        if is_selective:
+            for field_name in previous_failed_fields:
+                if field_name in field_positions:
+                    fields_to_evaluate.add(field_name)
+                elif previous_field_positions and field_name in previous_field_positions:
+                    pos = previous_field_positions[field_name]
+                    if 0 <= pos < total_fields:
+                        fields_to_evaluate.add(columns[pos]["name"])
+            logger.info(f"⚙️ Selective validation | Evaluating {len(fields_to_evaluate)} of {total_fields} fields")
+        else:
+            fields_to_evaluate = {col["name"] for col in columns}
+            logger.info(f"📋 Full validation | Evaluating all {total_fields} fields")
+
         structure_fail = name_fail = quality_fail = False
-
-        def label(score: float) -> str:
-            if score >= 90: return "accurate"
-            if score >= 75: return "aligned"
-            if score >= 60: return "vague"
-            if score >= 40: return "inaccurate"
-            return "missing"
+        evaluated_count = skipped_count = 0
 
         for col in columns:
-            fid = col.get("name", "UNKNOWN")
-            name = col.get("name", "").strip()
-            dtype = col.get("type", "").strip()
-            desc = col.get("description", "").strip()
+            field_id = col["name"]
+            name = col["name"].strip()
+            dtype = col["type"].strip()
+            desc = col["description"].strip()
 
-            # Step 1: Structure Gate
-            missing = []
-            if not name: missing.append("name")
-            if not dtype: missing.append("type")
-            if not desc: missing.append("description")
-            if missing:
+            if field_id not in fields_to_evaluate:
+                field_scores.append(90.0)
+                skipped_count += 1
+                continue
+
+            evaluated_count += 1
+
+            if not name or not dtype or not desc:
                 structure_fail = True
-                feedback_lines.append(f"[STRUCTURE GATE] '{fid}' missing: {', '.join(missing)}")
+                if not name:
+                    feedback_lines.append(f"[STRUCTURE] Field '{field_id}' is missing a name component")
+                if not dtype:
+                    feedback_lines.append(f"[STRUCTURE] Field '{field_id}' is missing a type component")
+                if not desc:
+                    feedback_lines.append(f"[STRUCTURE] Field '{field_id}' is missing a description component")
+                failed_fields.append(field_id)
+                continue
 
-            # Step 2: Score fields
             name_score = await self._score_component("name", name)
             type_score = await self._score_component("type", dtype)
             desc_score = await self._score_component("description", desc)
 
-            print(f"[SCORE] {fid} → name: {name_score}, type: {type_score}, desc: {desc_score}")
-
-            field_score = 0.5 * name_score + 0.3 * desc_score + 0.2 * type_score
+            field_score = (name_score * 0.5) + (desc_score * 0.3) + (type_score * 0.2)
             field_scores.append(field_score)
 
-            # Step 3: Retry Gates
+            if name_score < 90 or type_score < 75 or desc_score < 75:
+                logger.warning(f"🧪 Field: '{field_id}' | name: {name_score:.1f}, type: {type_score:.1f}, description: {desc_score:.1f} → Score: {field_score:.1f}")
+
+            field_has_failed = False
             if name_score < 90:
                 name_fail = True
-                feedback_lines.append(f"[NAME GATE] '{fid}' name_score={name_score:.1f} ({label(name_score)})")
+                feedback_lines.append(
+                    f"[NAME GATE] Field '{field_id}' name_score={name_score:.1f} ({self._label_score(name_score)}). Must be ≥ 90.")
+                field_has_failed = True
             if type_score < 75:
                 quality_fail = True
-                feedback_lines.append(f"[TYPE GATE] '{fid}' type_score={type_score:.1f} ({label(type_score)})")
+                feedback_lines.append(
+                    f"[TYPE GATE] Field '{field_id}' type_score={type_score:.1f} ({self._label_score(type_score)}). Must be ≥ 75.")
+                field_has_failed = True
             if desc_score < 75:
                 quality_fail = True
-                feedback_lines.append(f"[DESC GATE] '{fid}' desc_score={desc_score:.1f} ({label(desc_score)})")
+                feedback_lines.append(
+                    f"[DESC GATE] Field '{field_id}' desc_score={desc_score:.1f} ({self._label_score(desc_score)}). Must be ≥ 75.")
+                field_has_failed = True
+            if field_has_failed:
+                failed_fields.append(field_id)
 
-        # Step 4: Compute schema-level confidence
-        schema_conf = sum(field_scores) / len(field_scores) if field_scores else 0.0
-        confidence_score = round(schema_conf / 100.0, 4)
-
+        schema_score = sum(field_scores) / len(field_scores) if field_scores else 0.0
+        confidence_score = round(schema_score / 100.0, 4)
         retry_required = structure_fail or name_fail or quality_fail
         is_valid = not retry_required
-        feedback = "\n".join(feedback_lines) if feedback_lines else None
 
-        print(f"[VALIDATOR RESULT] ✅ is_valid: {is_valid} | confidence: {confidence_score:.4f}")
-        if feedback:
-            print(f"[VALIDATOR RESULT] ❗ Feedback:\n{feedback}")
+        feedback = "VALIDATION RESULT: Passed (all checks successful)"
+        if feedback_lines:
+            feedback = "VALIDATION FEEDBACK:\n" + "\n".join(feedback_lines)
+            feedback += f"\n\nOverall Schema Score: {schema_score:.2f}/100 ({confidence_score:.4f})"
 
-        return is_valid, confidence_score, feedback
+            if retry_required:
+                failed_str = ", ".join(f'"{f}"' for f in failed_fields)
+                feedback += f"\n\nFailed Fields: {failed_str}"
+                feedback += "\n\nVALIDATION RESULT: Failed (retry required)"
+                if structure_fail:
+                    feedback += "\n- Structure Gate: Failed (missing components)"
+                if name_fail:
+                    feedback += "\n- Name Gate: Failed (name scores below threshold)"
+                if quality_fail:
+                    feedback += "\n- Quality Gate: Failed (type/description scores below threshold)"
+                feedback += "\n\nPlease fix the issues highlighted above and regenerate the YAML."
+
+        logger.info(f"✅ Final Result | Valid: {is_valid} | Confidence: {confidence_score:.4f} | Failed: {len(failed_fields)}")
+        return is_valid, confidence_score, feedback, failed_fields, field_positions
