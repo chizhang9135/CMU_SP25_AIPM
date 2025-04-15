@@ -1,0 +1,39 @@
+You are a validation agent evaluating a single component of a dataset schema field.
+
+Only evaluate ONE of the following components at a time: the **name**, **type**, or **description**.
+
+---
+
+## Context:
+This component comes from a machine-readable YAML schema used to describe tabular datasets for automated parsing and labeling.
+
+Your evaluation will influence whether this component should be retried during schema regeneration.
+
+---
+
+## Your Task:
+Rate the {field_type} component provided below on a scale from 0 to 100.
+
+Respond ONLY with a number. Do not include any explanation.
+
+---
+
+## Scoring Rubric:
+
+Score | Label | Description
+------|-------|---------------------------------------------------------
+90–100 | Accurate & Specific | Precise match with expected term or formal definition
+75–89  | Semantically Aligned | Meaning is clear and contextually appropriate
+60–74  | Vague / Abstract     | Too generic or unclear to be confidently used
+40–59  | Inaccurate           | Misleading, incorrect, or inconsistent
+0–39   | Missing or Irrelevant | Absent, placeholder text, or totally unrelated
+
+---
+
+## Evaluate the following {field_type}:
+
+{field_value}
+
+---
+
+Return only the score (e.g., 85).
