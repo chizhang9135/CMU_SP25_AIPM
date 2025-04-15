@@ -44,13 +44,20 @@ class PDFToYAMLWorkflow:
         graph.add_edge("generate", "validate")
         
         # Add conditional edges with proper edge condition functions
+        # def validate_router(state: Dict) -> str:
+        #     if state.get("is_final"):
+        #         if state.get("confidence_score", 0) >= self.config.confidence_threshold:
+        #             return "output"
+        #         return "output"  # force output even with low confidence
+        #     return "generate"  # retry generation
+
         def validate_router(state: Dict) -> str:
-            if state.get("is_final"):
-                if state.get("confidence_score", 0) >= self.config.confidence_threshold:
-                    return "output"
-                return "output"  # force output even with low confidence
-            return "generate"  # retry generation
-            
+            feedback = state.get("validation_feedback") or ""
+            if any(tag in feedback for tag in ["[NAME GATE]", "[TYPE GATE]", "[DESC GATE]", "[STRUCTURE]"]):
+                if state.get("iteration_count", 0) < self.config.max_iterations:
+                    return "generate"
+            return "output"
+
         graph.add_conditional_edges("validate", validate_router)
         graph.add_edge("output", END)
         
@@ -84,26 +91,57 @@ class PDFToYAMLWorkflow:
             state["stacktrace"] = traceback.format_exc()
             state["is_final"] = True
             return state
-    
+
     async def _validate_yaml(self, state: PDFState) -> PDFState:
         """Validates YAML and determines next step"""
         print("Validating YAML")
         try:
+            # Ensure previous values are properly tracked
+            if "failed_fields" not in state:
+                state["failed_fields"] = []
+
+            if "field_positions" not in state:
+                state["field_positions"] = {}
+
+            # Validate YAML
             validated_state = await self.validator.validate_and_suggest(state)
-            # Update the current state with validation results
-            state.update(validated_state)
-            
-            # Set is_final if we've hit max iterations or have high confidence
-            if (state.get("iteration_count", 0) >= self.config.max_iterations or 
-                state.get("confidence_score", 0) >= self.config.confidence_threshold):
-                state["is_final"] = True
-            
+
+            # Update state with validation results
+            for key in ["confidence_score", "validation_feedback", "failed_fields", "field_positions", "is_final"]:
+                if key in validated_state:
+                    state[key] = validated_state[key]
+
+            print(
+                f"[WORKFLOW] Validation complete - confidence: {state['confidence_score']}, failed fields: {len(state.get('failed_fields', []))}")
             return state
+
         except Exception as e:
+            print(f"Error in validation: {str(e)}")
             state["error"] = str(e)
             state["stacktrace"] = traceback.format_exc()
             state["is_final"] = True
             return state
+    
+    # async def _validate_yaml(self, state: PDFState) -> PDFState:
+    # Comment for improvement
+    #     """Validates YAML and determines next step"""
+    #     print("Validating YAML")
+    #     try:
+    #         validated_state = await self.validator.validate_and_suggest(state)
+    #         # Update the current state with validation results
+    #         state.update(validated_state)
+    #
+    #         # Set is_final if we've hit max iterations or have high confidence
+    #         if (state.get("iteration_count", 0) >= self.config.max_iterations or
+    #             state.get("confidence_score", 0) >= self.config.confidence_threshold):
+    #             state["is_final"] = True
+    #
+    #         return state
+    #     except Exception as e:
+    #         state["error"] = str(e)
+    #         state["stacktrace"] = traceback.format_exc()
+    #         state["is_final"] = True
+    #         return state
     
     async def _format_output(self, state: PDFState) -> PDFState:
         """Formats the final YAML output"""
@@ -128,16 +166,50 @@ class PDFToYAMLWorkflow:
             state["is_final"] = True
             return state
     
+    # def _create_prompt(self, state: PDFState) -> str:
+    #     Comment for improvement
+    #     """Creates prompt for OpenAI based on state"""
+    #     prompt = f"Convert this text to YAML:\n{state['extracted_text']}"
+    #
+    #     if state.get("current_yaml"):
+    #         prompt += f"\n\nHere is the previous generated YAML:\n{state['current_yaml']}"
+    #     if state.get("validation_feedback"):
+    #         prompt += f"\n\nPrevious validation feedback:\n{state['validation_feedback']}"
+    #     return prompt
+
     def _create_prompt(self, state: PDFState) -> str:
-        """Creates prompt for OpenAI based on state"""
-        prompt = f"Convert this text to YAML:\n{state['extracted_text']}"
-        
+        """Creates optimized prompt for OpenAI based on state"""
+        prompt = f"Convert the following text to a YAML schema:\n\n{state['extracted_text']}\n\n"
+
         if state.get("current_yaml"):
-            prompt += f"\n\nHere is the previous generated YAML:\n{state['current_yaml']}"
+            prompt += "\nPrevious YAML schema:\n---\n"
+            prompt += yaml.dump(state["current_yaml"], sort_keys=False)
+            prompt += "\n---\n"
+
         if state.get("validation_feedback"):
-            prompt += f"\n\nPrevious validation feedback:\n{state['validation_feedback']}"
+            prompt += f"\nValidator Feedback:\n{state['validation_feedback']}\n"
+
+        failed_fields = state.get("failed_fields", [])
+
+        # Create more targeted instructions
+        if failed_fields:
+            failed_str = ", ".join(f'"{f}"' for f in failed_fields)
+
+            # More specific instructions that encourage better field naming
+            prompt += (
+                f"\nPlease regenerate ONLY the following fields in the YAML schema: {failed_str}.\n"
+                f"For each field:\n"
+                f"1. Improve the NAME to be more descriptive and specific (scores must be ≥90)\n"
+                f"2. Ensure TYPE is appropriate and accurate (scores must be ≥75)\n"
+                f"3. Make DESCRIPTIONS clear, specific and complete (scores must be ≥75)\n\n"
+                f"IMPORTANT: Keep all other fields EXACTLY as they appear in the previous YAML.\n"
+                f"DO NOT modify or rename any fields except those listed above.\n"
+            )
+        else:
+            prompt += "\nGenerate a complete YAML schema with descriptive field names and clear descriptions."
+
         return prompt
-    
+
     def _transform_yaml_to_json(self, yaml_path: str, features: List[Dict[str, Any]],
                            yaml_download_url: str) -> Dict[str, Any]:
         """
@@ -277,9 +349,12 @@ class PDFToYAMLWorkflow:
             "validation_feedback": None,
             "is_final": False,
             "error": None,
-            "stacktrace": None
+            "stacktrace": None,
+            # new add
+            "failed_fields": [],
+            "field_positions": {}
         }
-        
+
         try:
             final_state = await self.graph.ainvoke(initial_state)
             return final_state

@@ -14,6 +14,9 @@ class PDFState(TypedDict):
     stacktrace: Optional[str]          # Stack trace if error occurs
     output_path: Optional[str]         # Path to output YAML file
     json_obj: Optional[Dict]           # JSON object
+    #newly added
+    failed_fields: List[str]           # List of fields that failed validation
+    field_positions: Dict[str, int]    # Track field positions for mapping between iterations
 
 class WorkflowConfig:
     """Configuration for the workflow"""
