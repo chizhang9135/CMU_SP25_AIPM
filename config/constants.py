@@ -24,6 +24,8 @@ OPENAI_TEMPERATURE = 0.2
 DEFAULT_PROMPT_TEMPLATE = "config/prompts/schema_to_dataset.txt"
 DEFAULT_SCHEMA_VALIDATOR_PROMPT_TEMPLATE = "config/prompts/schema_validator.txt"
 DEFAULT_YAML_TEMPLATE = "config/templates/default.yaml"
+FIELD_SCORING_PROMPT_TEMPLATE = "config/prompts/field_score_prompt.txt"
+
 
 # Schema Keywords
 SCHEMA_KEYWORDS = ['schema', 'table', 'database', 'dataset']
