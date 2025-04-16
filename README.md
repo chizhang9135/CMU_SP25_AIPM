@@ -24,8 +24,7 @@ This project supports a one-command deployment using Docker. No need to install 
 
 ### 1. Prerequisites
 
-- [Docker](https://www.docker.com/) installed
-- [Docker Compose V2](https://docs.docker.com/compose/install/) or use `docker compose` (Docker v20.10+) 
+- [Docker and Docker Compose](https://www.docker.com/) installed
 
 > 🛑 **Note:** If your Docker requires elevated privileges, you may need to run the following commands with `sudo`.
 
