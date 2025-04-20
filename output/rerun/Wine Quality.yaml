@@ -1,0 +1,72 @@
+WineQuality:
+- role: system
+  content: '[Dataset Description]:
+
+    This dataset contains information about the quality of red and white variants
+
+    of the Portuguese "Vinho Verde" wine, based on physicochemical tests and sensory
+
+    evaluations. The goal is to model wine quality using these variables.
+
+
+    "fixed_acidity": float, the fixed acidity of the wine measured in grams per liter
+
+
+    "volatile_acidity": float, the volatile acidity of the wine measured in grams
+
+    per liter
+
+
+    "citric_acid": float, the citric acid content of the wine measured in grams per
+
+    liter
+
+
+    "residual_sugar": float, the residual sugar content of the wine measured in grams
+
+    per liter
+
+
+    "chloride_content": float, the chloride concentration in the wine measured in grams
+
+    per liter
+
+
+    "free_sulfur_dioxide": float, the free sulfur dioxide content of the wine measured
+
+    in milligrams per liter
+
+
+    "total_sulfur_dioxide": float, the total sulfur dioxide content of the wine measured
+
+    in milligrams per liter
+
+
+    "wine_density": float, the density of the wine measured in grams per cubic centimeter
+
+
+    "pH": float, the pH level of the wine
+
+
+    "sulphate_content": float, the sulphate concentration in the wine measured in grams
+
+    per liter
+
+
+    "alcohol_content": float, the alcohol percentage of the wine
+
+
+    "quality_score": integer, the quality score of the wine ranging from 0 to 10
+
+
+    "color": categorical, indicates the type of wine, either "red" or "white"
+
+
+    You can access the entire dataset via the "data" variable.
+
+
+    Note: The dataset does not contain any missing values. It is licensed under a
+
+    Creative Commons Attribution 4.0 International (CC BY 4.0) license, allowing for
+
+    sharing and adaptation with appropriate credit.'

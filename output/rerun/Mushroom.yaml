@@ -1,0 +1,195 @@
+MushroomDataset:
+- role: system
+  content: '[Dataset Description]:
+
+
+    This dataset includes descriptions of hypothetical samples corresponding to 23
+
+
+    species of gilled mushrooms in the Agaricus and Lepiota Family. Each species is
+
+
+    identified as definitely edible, definitely poisonous, or of unknown edibility
+
+
+    and not recommended.
+
+
+
+    "cap-shape": categorical, describes the shape of the mushroom cap with possible
+
+
+    values: bell=b, conical=c, convex=x, flat=f, knobbed=k, sunken=s
+
+
+
+    "cap-surface": categorical, describes the texture of the mushroom cap''s surface
+
+
+    with possible values: fibrous=f, grooves=g, scaly=y, smooth=s
+
+
+
+    "cap-color": binary, indicates the color of the cap with possible values: brown=n,
+
+
+    buff=b, cinnamon=c, gray=g, green=r, pink=p, purple=u, red=e, white=w, yellow=y
+
+
+
+    "bruising-indicator": categorical, indicates whether the mushroom shows bruising
+
+
+    when damaged with possible values: bruises=true, no=false
+
+
+
+    "odor-description": categorical, describes the scent of the mushroom with possible
+
+
+    values: almond=a, anise=l, creosote=c, fishy=y, foul=f, musty=m, none=n, pungent=p, spicy=s
+
+
+
+    "gill-attachment": categorical, describes how the gills are attached to the stalk
+
+
+    with possible values: attached=a, descending=d, free=f, notched=n
+
+
+
+    "gill-spacing": categorical, describes the spacing between the gills with possible
+
+
+    values: close=c, crowded=w, distant=d
+
+
+
+    "gill-size": categorical, describes the size of the gills with possible values:
+
+
+    broad=b, narrow=n
+
+
+
+    "gill-color": categorical, describes the color of the gills with possible values:
+
+
+    black=k, brown=n, buff=b, chocolate=h, gray=g, green=r, orange=o, pink=p, purple=u,
+
+
+    red=e, white=w, yellow=y
+
+
+
+    "stalk-shape": categorical, describes the shape of the stalk with possible values:
+
+
+    enlarging=e, tapering=t
+
+
+
+    "stalk-root": categorical, describes the type of stalk root with possible values:
+
+
+    bulbous=b, club=c, cup=u, equal=e, rhizomorphs=z, rooted=r, missing=?
+
+
+
+    "stalk-surface-above-ring": categorical, describes the surface texture of the stalk
+
+
+    above the ring with possible values: fibrous=f, scaly=y, silky=k, smooth=s
+
+
+
+    "stalk-surface-below-ring": categorical, describes the surface texture of the stalk
+
+
+    below the ring with possible values: fibrous=f, scaly=y, silky=k, smooth=s
+
+
+
+    "stalk-color-above-ring": categorical, describes the color of the stalk above the
+
+
+    ring with possible values: brown=n, buff=b, cinnamon=c, gray=g, orange=o,
+
+
+    pink=p, red=e, white=w, yellow=y
+
+
+
+    "stalk-color-below-ring": categorical, describes the color of the stalk below the
+
+
+    ring with possible values: brown=n, buff=b, cinnamon=c, gray=g, orange=o,
+
+
+    pink=p, red=e, white=w, yellow=y
+
+
+
+    "veil-type": binary, indicates the type of veil present with possible values:
+
+
+    partial=p, universal=u
+
+
+
+    "veil-color": categorical, describes the color of the veil with possible values:
+
+
+    brown=n, orange=o, white=w, yellow=y
+
+
+
+    "ring-number": categorical, describes the number of rings present on the stalk with
+
+
+    possible values: none=n, one=o, two=t
+
+
+
+    "ring-type": categorical, describes the type of ring with possible values: cobwebby=c,
+
+
+    evanescent=e, flaring=f, large=l, none=n, pendant=p, sheathing=s, zone=z
+
+
+
+    "spore-print-color": categorical, describes the color of the spore print with
+
+
+    possible values: black=k, brown=n, buff=b, chocolate=h, green=r, orange=o, purple=u,
+
+
+    white=w, yellow=y
+
+
+
+    "population-density": categorical, describes the population density with possible
+
+
+    values: abundant=a, clustered=c, numerous=n, scattered=s, several=v, solitary=y
+
+
+
+    "habitat-type": categorical, describes the habitat where the mushroom is found
+
+
+    with possible values: grasses=g, leaves=l, meadows=m, paths=p, urban=u, waste=w, woods=d
+
+
+
+    You can access the entire dataset via the "data" variable.
+
+
+
+    Note: The dataset contains missing values and is intended for classification tasks
+
+
+    in the field of biology. It is licensed under a Creative Commons Attribution 4.0
+
+
+    International (CC BY 4.0) license.'

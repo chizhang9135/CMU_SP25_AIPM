@@ -34,7 +34,6 @@ ENV/
 .DS_Store
 
 # Project specific
-output/
 *.log 
 
 .DS_Store

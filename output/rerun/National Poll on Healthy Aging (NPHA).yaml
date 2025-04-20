@@ -1,0 +1,56 @@
+NationalPollOnHealthyAging:
+- role: system
+  content: '[Dataset Description]:
+
+    The National Poll on Healthy Aging dataset was created to gather insights on the health, healthcare, and health policy issues affecting Americans aged 50 and older. It focuses on the perspectives of older adults and their caregivers to inform the public and healthcare providers.
+
+
+    "Number_of_Doctors_Visited_Last_Year": categorical, the total count of distinct doctors that the patient has consulted in the past year, categorized as follows: { 1: 0-1 doctors, 2: 2-3 doctors, 3: 4 or more doctors }
+
+
+    "Patient_Age_Group": categorical, the age category of the patient based on their age, defined as follows: { 1: 50-64, 2: 65-80 }
+
+
+    "Patient_Physical_Health_Status": categorical, a self-assessment of the patient''s physical health condition, categorized as follows: { -1: Refused, 1: Excellent, 2: Very Good, 3: Good, 4: Fair, 5: Poor }
+
+
+    "Patient_Mental_Health_Status": categorical, a self-evaluation of the patient''s mental or psychological health condition, categorized as follows: { -1: Refused, 1: Excellent, 2: Very Good, 3: Good, 4: Fair, 5: Poor }
+
+
+    "Patient_Dental_Health_Status": categorical, a self-assessment of the patient''s oral or dental health condition, categorized as follows: { -1: Refused, 1: Excellent, 2: Very Good, 3: Good, 4: Fair, 5: Poor }
+
+
+    "Patient_Employment_Status": categorical, the patient''s current employment situation or work-related information, categorized as follows: { -1: Refused, 1: Working full-time, 2: Working part-time, 3: Retired, 4: Not working at this time }
+
+
+    "Stress_Impact_on_Patient_Sleep": categorical, whether stress negatively affects the patient''s ability to sleep, categorized as follows: { 0: No, 1: Yes }
+
+
+    "Medication_Impact_on_Patient_Sleep": categorical, whether prescribed medication influences the patient''s sleep quality, categorized as follows: { 0: No, 1: Yes }
+
+
+    "Pain_Impact_on_Patient_Sleep": categorical, whether physical pain disrupts the patient''s sleep, categorized as follows: { 0: No, 1: Yes }
+
+
+    "Bathroom_Needs_Impact_on_Patient_Sleep": categorical, whether the need to use the bathroom interferes with the patient''s sleep, categorized as follows: { 0: No, 1: Yes }
+
+
+    "Unknown_Factors_Impact_on_Patient_Sleep": categorical, unidentified factors that may affect the patient''s sleep, categorized as follows: { 0: No, 1: Yes }
+
+
+    "General_Trouble_Sleeping": categorical, general issues or difficulties the patient experiences with sleeping, categorized as follows: { 0: No, 1: Yes }
+
+
+    "Prescription_Sleep_Medication": categorical, information about any sleep medication prescribed to the patient, categorized as follows: { -1: Refused, 1: Use regularly, 2: Use occasionally, 3: Do not use }
+
+
+    "Patient_Race_Ethnicity": categorical, the patient''s racial or ethnic background, categorized as follows: { -2: Not asked, -1: REFUSED, 1: White, Non-Hispanic, 2: Black, Non-Hispanic, 3: Other, Non-Hispanic, 4: Hispanic, 5: 2+ Races, Non-Hispanic }
+
+
+    "Patient_Gender_Identity": categorical, the gender identity of the patient, categorized as follows: { -2: Not asked, -1: REFUSED, 1: Male, 2: Female }
+
+
+    You can access the entire dataset via the "data" variable.
+
+
+    Note: This dataset contains sensitive information regarding race/ethnicity, gender, and age. All survey respondents with missing responses for any of the chosen features were removed. The dataset is licensed under a Creative Commons Attribution 4.0 International (CC BY 4.0) license.'
