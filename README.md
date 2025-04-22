@@ -104,12 +104,18 @@ pip install -r requirements.txt
 
 ### 3. Configuration
 
-Edit `config/constants.py` to set:
+This project uses a .env file to store the OpenAI API key.
 
-- OpenAI API key (or use the `OPENAI_API_KEY` environment variable)
-- Model (e.g., `"gpt-4"`)
-- Default YAML template path
-- Schema parsing keywords
+Create a `.env` file in the project root with the following content:
+
+```
+OPENAI_API_KEY="your-api-key-here"
+```
+
+**Important:** The API key must be wrapped in double quotes ("), or it may not be parsed correctly.
+
+Note: The .env file is loaded automatically using python-dotenv. Make sure the package is installed:
+
 
 ---
 
